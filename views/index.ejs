@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Guidene</title>
+</head>
+<body>
+    <%- include ("partials/navbar") %>
+    <div class="main-content">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+        <script>
+            function toggleSidebar() {
+              const sidebar = document.querySelector('.sidebar');
+              const content = document.querySelector('.main-content');
+              
+              sidebar.classList.toggle('active');
+              content.classList.toggle('shifted');
+            }
+        </script>
+
+        <h1>Guide</h1>
+        <input type="text">
+        <div class="guideContainer">
+            <div class="guideBox"></div>
+            <div class="guideBox"></div>
+            <div class="guideBox"></div>
+            <div class="guideBox"></div>
+            <div class="guideBox"></div>
+            <div class="guideBox"></div>
+        </div>
+    </div>
+</body>
+</html>
