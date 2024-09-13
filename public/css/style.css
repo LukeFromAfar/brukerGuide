@@ -28,6 +28,7 @@ body {
     top: 0;
     width: 100%;
     padding: 1rem;
+    justify-content: center;
 }
 
 h1 {
