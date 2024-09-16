@@ -73,7 +73,6 @@ nav {
 
 .navbar a:nth-child(2) {
     margin-right: 50%;
-    
 }
 
 h1 {
@@ -148,4 +147,27 @@ h1 {
 .sidebar a {
     font-size: 2rem;
     text-align: center;
+}
+
+.login-content {
+    align-items: center;
+}
+
+.centerLogin {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--darkgray);
+    padding: 3rem;
+    border-radius: 1rem;
+    font-size: 1.5rem;
+    font-family: var(--WorkSans);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
