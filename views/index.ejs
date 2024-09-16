@@ -8,7 +8,6 @@
     <title>Guidene</title>
 </head>
 <body>
-    <%- include ("partials/sidebar") %>
     <div class="main-content">
         <%- include ("partials/navbar") %>
         <div class="main-title">
@@ -28,14 +27,5 @@
             <div class="guideBox">1</div>
         </div>
     </div>
-    <script>
-        function toggleSidebar() {
-          const sidebar = document.querySelector('.sidebar');
-          const content = document.querySelector('.main-content');
-          
-          sidebar.classList.toggle('active');
-          content.classList.toggle('shifted');
-        }
-    </script>
 </body>
 </html>

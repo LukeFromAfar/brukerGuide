@@ -1,6 +1,16 @@
 :root {
-    --primary: ;
-    --secondary: ;
+    --primary:#ffa31a;
+    --secondary: #808080;
+    --white: #ffffff;
+    --darkgray: #292929;
+    --darkergray: #1b1b1b;
+    --WorkSans: WorkSans;
+
+}
+
+@font-face {
+    font-family: WorkSans;
+    src: url(../font/Work_Sans/WorkSans-VariableFont_wght.ttf);
 }
 
 html {
@@ -9,72 +19,69 @@ html {
 }
 
 body {
-    background-color: rgb(255, 255, 255);
+    background-color: var(--darkergray);
     margin: 0px;
     padding: 0px;
     min-height: 100%;
-    color: rgb(0, 0, 0);
+    color: var(--white);
     display: inline-block;
     width: 100%;
     height: 100%;
     font-size: 16px;
     overflow-x: hidden;
 }
-
-.navbar {
-    background-color: aqua;
-    display: flex;
+nav {
+    overflow: hidden;
     position: fixed;
     top: 0;
+    left: 0;
     width: 100%;
-    padding: 1rem;
-    justify-content: center;
+    z-index: 1000; 
+}
+
+.navbar {
+    display: flex;
+    align-items: center; 
+    list-style: none; 
+    margin: 0;
+    background-color: var(--primary);
+    width: 100%;
+    padding: 0;
+    font-family: var(--WorkSans);
+}
+
+.navbar a {
+    display: inline-block;
+    flex-grow: 1;
+    width: max-content;
+    font-size: 1.8rem;
+    padding: 1rem 0 1rem 0;
+    color: var(--darkgray);
+}
+
+.navbar a img {
+    height: 3rem;
+}
+
+#logoHolder {
+    padding: 0 1rem 0 2rem;
+}
+
+#logoHolder img {
+    width: 5rem;
+}
+
+.navbar a:nth-child(2) {
+    margin-right: 50%;
+    
 }
 
 h1 {
     font-size: 4rem;
-}
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 300px; /* Adjust the width as needed */
-    height: 100vh;
-    background-color: #333;
-    color: white;
-    overflow-y: auto; /* Sidebar scrolls independently */
-    transform: translateX(-80%); /* Hidden initially */
-    transition: transform 0.3s ease;
-    z-index: 1000;
-}
-
-
-
-.sidebar-toggle {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    background-color: #333;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    z-index: 1001;
-  }
-
-.sidebar.active {
-    transform: translateX(0); /* Slide in */
-}
-
-.main-content.shifted {
-    margin-left: 300px;
+    font-family: var(--WorkSans);
 }
 
 .main-content {
-    transition: margin-left 0.3s ease;
-    margin-left: 60px;
     display: flex;
     justify-content: center;
     height: 100%;
@@ -106,15 +113,39 @@ h1 {
     gap: 1rem;
     flex-wrap: wrap;
     padding: 1rem;
-    
+
 }
 
 .guideBox {
-    background-color: rgb(163, 163, 163);
+    background-color: var(--secondary);
     border: black solid 1px;
     border-radius: 1rem;
     min-width: 200px;
     height: 200px;
     padding: 1rem;
-    /* flex-grow: 1; */
+}
+
+.guidePage {
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-areas: 
+    "sidebar guideContent guideContent guideContent guideContent";
+}
+
+.sidebar {
+    grid-area: sidebar;
+    background-color: var(--primary);
+    display: flex;
+    flex-direction: column;
+    font-family: var(--WorkSans);
+}
+
+.guideContent {
+    grid-area: guideContent;
+}
+
+.sidebar a {
+    font-size: 2rem;
+    text-align: center;
 }
