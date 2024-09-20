@@ -138,6 +138,7 @@ h1 {
     display: flex;
     flex-direction: column;
     font-family: var(--WorkSans);
+    
 }
 
 .guideContent {
@@ -147,6 +148,7 @@ h1 {
 .sidebar a {
     font-size: 2rem;
     text-align: center;
+    justify-self: end;
 }
 
 .login-content {
@@ -170,4 +172,22 @@ h1 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
+}
+
+.form p {
+    margin: 0px;
+    padding: 1rem 0 1rem 0;
+}
+
+.form a {
+    color: var(--white);
+    font-size: 1rem;
+}
+
+input[type=submit] {
+    color: var(--darkergray);
+    background-color:var(--primary);
+    border: none;
+    border-radius: 0.2rem;
 }
