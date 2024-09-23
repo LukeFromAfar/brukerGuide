@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Brukestøtte</title>
+        <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
+        <link rel="stylesheet" href="/css/main.css">
+    </head>
+<body>
+    <nav>
+        <a href="/">Logo</a>
+        <a href="/guide">Guide</a>
+        <a href="/login">Logg inn</a>
+    </nav>
+    <h1>ny guide</h1>
+    <input title type="title">
+    <input tag type="tag">
+    <form action="" method="post" id="formcontainer" enctype="multipart/form-data">
+        <div id="addnewsection">
+            <h2>seksjon</h2>
+            <div name = "section">
+                <input name = "overskrift" overskrift type="text">
+                <input name = "beskrivelse" beskrivelse type="text">
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="bilde" accept="img/*"/>
+                    <button type="submit">Upload</button>
+                </form>
+            </div>
+        </div>
+    </form>
+    <button onclick="lagnyseksjon()">ny seksjon</button>
+
+
+    <script>
+        function lagnyseksjon() {
+            document.getElementById("addnewsection")
+            let newSection = document.getElementById("addnewsection")
+            newSection.innerHTML += `
+            <div>
+            <h2>seksjon</h2>
+                <div>
+                    <input name = "overskrift" overskrift type="text">
+                    <input name = "beskrivelse" beskrivelse type="text">
+                    <input type="file" name="file" id="iputfile">
+                </div>
+            </div>
+            `
+        }
+
+
+
+
+    </script>
+</body>
+</html>

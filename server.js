@@ -3,10 +3,31 @@ const app = express();
 require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
+const path = require("path");
 
 
 const Schema = mongoose.Schema;
 
+const diskStorage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, "./uploads")
+    },
+    filename: function(req, file, cb){
+        const ext = path.extname(file.originalname);
+        console.log("EXT", ext);
+
+        if(ext !== ".png") {
+            return cb(new Error ("Only PNG files allowed"))
+        }
+        const fileName = file.originalname + ".png";
+        cb(null, fileName)
+    }
+});
+
+const uploads = multer(
+    storeage = diskStorage
+);
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
@@ -88,6 +109,26 @@ app.get("/guide", (req, res) => {
 app.get("/dashboard", (req, res) => {
     res.render("dashboard")
 })
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');  
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname));  
+    }
+});
+  
+const upload = multer({ storage });
+
+app.get("/newGuide", (req, res) => {
+    res.render("newguide");
+});
+
+app.post("/newGuide", uploads.array("image"), (req, res) => {
+    console.log(req.body, "BODY")
+    console.log(req.file, "FILE")
+});
 
 app.listen(process.env.PORT);
 
