@@ -3,53 +3,71 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Brukestøtte</title>
-        <link rel="shortcut icon" href="/favicon.png" type="image/x-icon">
-        <link rel="stylesheet" href="/css/main.css">
+        <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
+        <link rel="stylesheet" href="/css/style.css">
+        <title>Guide</title>
     </head>
 <body>
-    <nav>
-        <a href="/">Logo</a>
-        <a href="/guide">Guide</a>
-        <a href="/login">Logg inn</a>
-    </nav>
-    <h1>ny guide</h1>
-    <input title type="title">
-    <input tag type="tag">
-    <form action="" method="post" id="formcontainer" enctype="multipart/form-data">
-        <div id="addnewsection">
-            <h2>seksjon</h2>
-            <div name = "section">
-                <input name = "overskrift" overskrift type="text">
-                <input name = "beskrivelse" beskrivelse type="text">
-                <form action="/upload" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="bilde" accept="img/*"/>
-                    <button type="submit">Upload</button>
-                </form>
-            </div>
-        </div>
-    </form>
-    <button onclick="lagnyseksjon()">ny seksjon</button>
+    <%- include ("partials/navbar") %>
+    <h1>New Guide</h1>
+    <form action="" method="post" id="formContainer" enctype="multipart/form-data">
+        <div class="section">
 
-
-    <script>
-        function lagnyseksjon() {
-            document.getElementById("addnewsection")
-            let newSection = document.getElementById("addnewsection")
-            newSection.innerHTML += `
             <div>
-            <h2>seksjon</h2>
-                <div>
-                    <input name = "overskrift" overskrift type="text">
-                    <input name = "beskrivelse" beskrivelse type="text">
-                    <input type="file" name="file" id="iputfile">
+                <label for="title">Title</label>
+                <input type="text" name="title" id="title" required>
+            </div>
+            <div>
+                <label for="tag">Tag</label>
+                <input type="text" name="tag" id="tag" required>
+            </div>
+            <div id="addNewSection">
+                <div name="section">
+
+                    <h2>Section</h2>
+                    
+                    <div>
+                        <label for="header">Overskrift</label>
+                        <input type="text" name="header" id="header" required>
+                    </div>
+                    <div>
+                        <label for="description">Description</label>
+                        <input type="text" name="description" id="description" required>
+                    </div>
+                    <div>
+                        <label for="image">Image</label>
+                        <input type="file" name="image" id="image" accept="image/png image/jpeg image/jpg" required>
+                    </div>
                 </div>
             </div>
-            `
+        </div>
+        <button>Send in</button>
+    </form>
+    <button onclick="newSection()">Create new section</button>
+    <script>
+        function newSection() {
+        
+          let addNewSection = document.getElementById("addNewSection");
+        //   let newSection2 = document.querySelector("#addNewSection");
+        newSection.innerHTML += `
+         <div>
+                <h2>Seksjon</h2>
+
+                <div>
+                        <label for="header">Overskrift</label>
+                        <input type="text" name="header" id="header" required>
+                    </div>
+                    <div>
+                        <label for="description">Description</label>
+                        <input type="text" name="description" id="description" required>
+                    </div>
+                    <div>
+                        <label for="image">Image</label>
+                        <input type="file" name="image" id="image" accept="image/png image/jpeg image/jpg" required>
+                    </div>
+            </div>
+        `
         }
-
-
-
 
     </script>
 </body>
