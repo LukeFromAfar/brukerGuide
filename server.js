@@ -49,24 +49,55 @@ app.get("/login", (req, res) => {
     res.render("login")
 });
 
-app.post("/login", (req, res) => {
-    console.log("logger ut her", req.body);
-    const {uname, psw} = req.body;
+// app.post("/login", (req, res) => {
+//     console.log("logger inn her", req.body);
+//     const {uname, psw} = req.body;
 
-    User.findOne({email: uname})
+//     User.findOne({email: uname})
+//         .then((user) => {
+//             console.log("result", user);
+
+//             bcrypt.compare(psw, user.password).then((result) => {
+//                 if (result) {
+//                   return res.status(200).redirect("/dashboard");
+//                 } else {
+//                   return res.status(400).json({ error: "wrong password" });
+//                 }
+//             });
+            
+//         }).catch((user))
+
+//     console.log(uname);
+
+// })
+
+app.post("/login", (req, res) => {
+    console.log("logger inn her", req.body);
+    const { uname, psw } = req.body;
+
+    User.findOne({ email: uname })
         .then((user) => {
             console.log("result", user);
 
+            if (!user) {
+                // User not found
+                return res.status(404).send("User not found");
+            }
+
+            // If user is found, check the password
             bcrypt.compare(psw, user.password).then((result) => {
-                res.status(200).redirect("/dashboard")
-            }).catch((error) => {
-                console.log("error", error);
-            })
+                if (result) {
+                    return res.status(200).redirect("/dashboard");
+                } else {
+                    return res.status(400).send("Wrong password");
+                }
+            });
         })
-
-    console.log(uname);
-
-})
+        .catch((err) => {
+            console.error("Error occurred during login:", err);
+            return res.status(500).send("Internal server error");
+        });
+});
 
 app.get("/signup", (req, res) => {
     res.render("signup")
@@ -87,28 +118,50 @@ const guideSchema = new Schema ({
 
 const User = mongoose.model("User", userSchema);
 const Guides = mongoose.model("Guides", guideSchema);
+// app.post("/signup", async (req, res) => {
+//     console.log("signer opp her", req.body);
+//     const {uname, psw, psw2} = req.body;
+//     console.log(uname, psw, psw2, psw == psw2);
+
+//     if(psw == psw2){
+
+//         bcrypt.hash(psw, saltRounds, async function(error, hash) {
+//             const newUser = new User({email: uname, password: hash});
+        
+//             const result = await newUser.save();
+//             console.log(result);
+//             if(result._id){
+//                 res.redirect("/dashboard")
+//             }
+//         })
+
+//     } else {
+//         res.status(500).json({message: "Passord stemmer ikke overens"})
+//     }
+
+// })
 app.post("/signup", async (req, res) => {
     console.log("signer opp her", req.body);
-    const {uname, psw, psw2} = req.body;
-    console.log(uname, psw, psw2, psw == psw2);
+    const { uname, psw, psw2 } = req.body;
+    console.log(uname, psw, psw2, psw === psw2);
 
-    if(psw == psw2){
-
-        bcrypt.hash(psw, saltRounds, async function(error, hash) {
-            const newUser = new User({email: uname, password: hash});
-        
+    if (psw === psw2) {
+        try {
+            const hash = await bcrypt.hash(psw, saltRounds);
+            const newUser = new User({ email: uname, password: hash });
             const result = await newUser.save();
             console.log(result);
-            if(result._id){
-                res.redirect("/dashboard")
+            if (result._id) {
+                return res.status(200).send("Sign-up successful"); // Success response
             }
-        })
-
+        } catch (error) {
+            console.error("Error saving user:", error);
+            return res.status(500).send("Internal server error"); // Error response
+        }
     } else {
-        res.status(500).json({message: "Passord stemmer ikke overens"})
+        return res.status(400).send("Passwords do not match"); // Plain text response for mismatched passwords
     }
-
-})
+});
 
 app.get("/guide", (req, res) => {
     res.render("guide")

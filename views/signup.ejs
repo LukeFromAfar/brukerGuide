@@ -4,24 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/style.css">
-    <title>Log In</title>
+    <title>Sign Up</title>
 </head>
 <body>
-    <%- include ("partials/navbar") %>
+    <%- include("partials/navbar") %>
     <div class="main-content login-content">
         <div class="centerLogin">
             <h2>Sign up</h2>
-            <form class="form" action="" method="POST">
+            <form id="signupForm" class="form" method="POST">
                 <input type="text" placeholder="Enter Username" name="uname" id="username" required>
         
                 <input type="password" placeholder="Enter Password" name="psw" id="password" required>
         
                 <input type="password" placeholder="Repeat Password" name="psw2" id="password2" required>
 
-                <input type="submit" name="send" ></input>
+                <input type="submit" value="Sign Up">
             </form>
             <a href="/login">Already a user?</a>
         </div>
     </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(this);
+            const data = new URLSearchParams(formData);
+
+            fetch('/signup', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/dashboard';
+                } else {
+                    return response.text().then(text => {
+                        alert(text);
+                        this.reset();
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+                this.reset();
+            });
+        });
+    </script>
 </body>
 </html>

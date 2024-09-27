@@ -7,19 +7,45 @@
     <title>Log In</title>
 </head>
 <body>
-    <%- include ("partials/navbar") %>
+    <%- include("partials/navbar") %>
     <div class="main-content login-content">
         <div class="centerLogin">
             <h2>Log in</h2>
-            <form class="form" action="" method="POST">
+            <form id="loginForm" class="form" method="POST">
                 <input type="text" placeholder="Enter Username" name="uname" required>
-        
                 <input type="password" placeholder="Enter Password" name="psw" required>
-        
-                <input type="submit"></input>
+                <input type="submit" value="Log In">
             </form>
-            <a href="signup">Don&acute;t have a user?</a>
+            <a href="signup">Don’t have a user?</a>
         </div>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = new URLSearchParams(formData);
+
+            fetch('/login', {
+                method: 'POST',
+                body: data
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/dashboard';
+                } else {
+                    return response.text().then(text => {
+                        alert(text);
+                        this.reset();
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+                this.reset();
+            });
+        });
+    </script>
 </body>
 </html>
