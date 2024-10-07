@@ -9,23 +9,42 @@
 </head>
 <body>
     <div class="main-content">
-        <%- include ("partials/navbar") %>
+        <%- include("partials/navbar") %>
         <div class="main-title">
             <h1>Guide</h1>
             <input type="text" name="search" id="search" placeholder="search...">
         </div>
-        <div class="guideContainer">
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
-            <div class="guideBox">1</div>
+        <div id="guideContainer">
+            <% guides.forEach(guide => { %> 
+                <div class="guideBox">
+                    <a href="/guide/<%= guide._id %>"><%= guide.title %></a> 
+                </div>
+            <% }) %>
         </div>
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search');
+        const guideContainer = document.getElementById('guideContainer');
+        const guideBoxes = guideContainer.getElementsByClassName('guideBox');
+        console.log("Loaded Search");
+        
+
+        searchInput.addEventListener('input', () => {
+            const filter = searchInput.value.toLowerCase(); // Get the current input value
+            console.log("Changed to lowercase");
+
+            Array.from(guideBoxes).forEach(guideBox => {
+                const title = guideBox.getAttribute('data-title').toLowerCase(); // Get the title from data attribute
+
+                if (title.includes(filter)) {
+                    guideBox.style.display = ''; // Show the guide box
+                } else {
+                    guideBox.style.display = 'none'; // Hide the guide box
+                }
+            });
+        });
+        });
+    </script>
 </body>
 </html>

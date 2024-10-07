@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
     <link rel="stylesheet" href="/css/style.css">
-    <title>Guide</title>
+    <title><%= guide.title %></title>
 </head>
 <body>
     <div class="main-content">
@@ -15,7 +15,19 @@
                 <a href="login">Log In</a>
             </div>
             <div class="guideContent">
-                <h1>Guide</h1>
+                <h1><%= guide.title %></h1> <!-- Display the guide title -->
+                <p><strong>Tag:</strong> <%= guide.tag %></p> <!-- Display the guide tag -->
+                
+                <!-- Loop through the sections to display headers, descriptions, and images -->
+                <% for (let i = 0; i < guide.header.length; i++) { %>
+                    <div class="section">
+                        <h2><%= guide.header[i] %></h2> <!-- Section header -->
+                        <p><%= guide.description[i] %></p> <!-- Section description -->
+                        <% if (guide.image[i]) { %>
+                            <img src="/uploads/<%= guide.image[i] %>" alt="<%= guide.header[i] %> image"> <!-- Section image -->
+                        <% } %>
+                    </div>
+                <% } %>
             </div>
         </div>
     </div>
