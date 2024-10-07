@@ -1,76 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
-        <link rel="stylesheet" href="/css/style.css">
-        <title>Guide</title>
-    </head>
-<body>
-    <%- include ("partials/navbar") %>
-    <h1>New Guide</h1>
-    <form action="/newGuide" method="post" id="formContainer" enctype="multipart/form-data">
-        <div class="section">
-
-            <div>
-                <label for="title">Title</label>
-                <input type="text" name="title" id="title" required>
-            </div>
-            <div>
-                <label for="tag">Tag</label>
-                <input type="text" name="tag" id="tag" required>
-            </div>
-            <div id="addNewSection">
-                <div name="section">
-
-                    <h2>Section</h2>
-                    
-                    <div>
-                        <label for="header">Header</label>
-                        <input type="text" name="header" id="header" required>
-                    </div>
-                    <div>
-                        <label for="description">Description</label>
-                        <input type="text" name="description" id="description" required>
-                    </div>
-                    <div>
-                        <label for="image">Image</label>
-                        <input type="file" name="image" id="image" accept="image/png image/jpeg image/jpg" required>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button>Send in</button>
-    </form>
-    <button onclick="newSection()">Create new section</button>
-    <script>
-        function newSection() {
-            let addNewSection = document.getElementById("addNewSection");
-            
-            // Append the new section correctly
-            addNewSection.innerHTML += `
-                <div>
-                    <h2>Section</h2>
-                    <div>
-                        <label for="header">Header</label>
-                        <input type="text" name="header" required>
-                    </div>
-                    <div>
-                        <label for="description">Description</label>
-                        <input type="text" name="description" required>
-                    </div>
-                    <div>
-                        <label for="image">Image</label>
-                        <input type="file" name="image" accept="image/png image/jpeg image/jpg">
-                    </div>
-                </div>
-            `;
-        }
-    </script>
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,11 +29,11 @@
                     </div>
                     <div>
                         <label for="description">Description</label>
-                        <input type="text" name="description[0]" id="description-0" required>
+                        <input type="text" name="description[0]" id="description-0" >
                     </div>
                     <div>
                         <label for="image">Image</label>
-                        <input type="file" name="image[0]" id="image-0" accept="image/png, image/jpeg, image/jpg" required>
+                        <input type="file" name="image[0]" id="image-0" accept="image/png, image/jpeg, image/jpg" >
                     </div>
                 </div>
             </div>
@@ -117,31 +44,45 @@
 
     <script>
         let sectionIndex = 1; // Start with section 1 (0-indexed)
-
+    
         function newSection() {
+            // Collect current input values
+            const inputs = document.querySelectorAll('input');
+            let values = {};
+            inputs.forEach(input => {
+                values[input.id] = input.value; // Save current values by input ID
+            });
+    
             let addNewSection = document.getElementById("addNewSection");
-
+    
             // Increment the section index
             sectionIndex++;
-
+    
             // Append a new section with indexed inputs
             addNewSection.innerHTML += `
-            <div name="section">
-                <h2>Section ${sectionIndex}</h2>
-                <div>
-                    <label for="header">Header</label>
-                    <input type="text" name="header[${sectionIndex - 1}]" id="header-${sectionIndex - 1}" required>
+                <div name="section">
+                    <h2>Section ${sectionIndex}</h2>
+                    <div>
+                        <label for="header">Header</label>
+                        <input type="text" name="header[${sectionIndex - 1}]" id="header-${sectionIndex - 1}" required>
+                    </div>
+                    <div>
+                        <label for="description">Description</label>
+                        <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}">
+                    </div>
+                    <div>
+                        <label for="image">Image</label>
+                        <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
+                    </div>
                 </div>
-                <div>
-                    <label for="description">Description</label>
-                    <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}" required>
-                </div>
-                <div>
-                    <label for="image">Image</label>
-                    <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg" required>
-                </div>
-            </div>
             `;
+    
+            // Restore the values in existing fields
+            inputs.forEach(input => {
+                if (values[input.id]) {
+                    document.getElementById(input.id).value = values[input.id]; // Set saved values back into fields
+                }
+            });
         }
     </script>
 </body>

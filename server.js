@@ -164,9 +164,13 @@ const userSchema = new Schema({
 const guideSchema = new Schema({
     title: { type: String, required: true },
     tag: { type: String, required: true },
-    header: { type: [String], required: true },
-    description: { type: [String], required: false }, 
-    image: { type: [String], required: false } 
+    sections: [
+        {
+            header: { type: String, required: true },
+            description: { type: String, required: false },
+            image: { type: String, required: false }
+        }
+    ]
 });
 
 const User = mongoose.model("User", userSchema);
@@ -224,57 +228,83 @@ app.get("/newGuide", (req, res) => {
 });
 
 
-// app.post("/newGuide", uploads.any(), async (req, res) => {
+// app.post('/newGuide', uploads.any(), async (req, res) => {
 //     console.log(req.body, "BODY");
 //     console.log(req.files, "FILES");
-  
-//     // req.body.header, req.body.description will be arrays
-//     const headers = req.body.header;
-//     const descriptions = req.body.description;
-//     const images = req.files.map(file => file.filename); // Array of uploaded images
-  
-//     const newGuides = new Guides({
-//       title: req.body.title,
-//       tag: req.body.tag,
-//       header: headers,
-//       description: descriptions,
-//       image: images
+
+//     // Process each section data
+//     const sections = req.body.header.map((header, index) => ({
+//         header,
+//         description: req.body.description[index],
+//         image: req.files[index] ? req.files[index].filename : null // Match files to the index
+//     }));
+
+//     const newGuide = new Guides({
+//         title: req.body.title,
+//         tag: req.body.tag,
+//         sections
 //     });
-  
+
 //     try {
-//       const result = await newGuides.save();
-//       res.status(201).send({ message: "Guide created successfully", data: result });
+//         const result = await newGuide.save();
+//         res.status(201).send({ message: "Guide created successfully", data: result });
 //     } catch (error) {
-//       console.error("Error saving guide:", error);
-//       res.status(500).send("Internal server error");
+//         console.error("Error saving guide:", error);
+//         res.status(500).send("Internal server error");
 //     }
 // });
 
-app.post('/newGuide', uploads.fields([
-    { name: 'header', maxCount: 10 }, // Adjust maxCount as necessary
-    { name: 'description', maxCount: 10 },
-    { name: 'image', maxCount: 10 }
-]), (req, res) => {
+// app.post('/newGuide', uploads.fields([
+//     { name: 'header' },
+//     { name: 'description' },
+//     { name: 'image' } 
+// ]), (req, res) => {
+//     console.log(req.body, "BODY");
+//     console.log(req.files, "FILES");
+
+//     // Process each section data
+//     const sections = req.body.header.map((header, index) => ({
+//         header,
+//         description: req.body.description ? req.body.description[index] : null, // Optional description
+//         image: req.files['image'] ? req.files['image'][index] ? req.files['image'][index].filename : null : null // Optional image
+//     }));
+
+//     const newGuide = new Guides({
+//         title: req.body.title,
+//         tag: req.body.tag,
+//         sections
+//     });
+
+//     newGuide.save()
+//         .then(result => res.status(201).send({ message: "Guide created successfully", data: result }))
+//         .catch(err => res.status(500).send("Internal server error"));
+// });
+
+app.post('/newGuide', uploads.any(), async (req, res) => {
     console.log(req.body, "BODY");
     console.log(req.files, "FILES");
 
     // Process each section data
     const sections = req.body.header.map((header, index) => ({
         header,
-        description: req.body.description[index],
-        image: req.files['image'] ? req.files['image'][index] ? req.files['image'][index].filename : null : null
+        description: req.body.description ? req.body.description[index] : null, // Optional description
+        image: req.files.find(file => file.fieldname === `image[${index}]`) ? req.files.find(file => file.fieldname === `image[${index}]`).filename : null // Optional image
     }));
 
-    // Assuming you have a Guide model for saving
-    const newGuide = new Guide({
+    const newGuide = new Guides({
         title: req.body.title,
         tag: req.body.tag,
-        sections // Store sections in the guide
+        sections
     });
 
-    newGuide.save()
-        .then(result => res.status(201).send({ message: "Guide created successfully", data: result }))
-        .catch(err => res.status(500).send("Internal server error"));
+    try {
+        const result = await newGuide.save();
+        // res.status(201).send({ message: "Guide created successfully", data: result });
+        res.redirect("/");
+    } catch (error) {
+        console.error("Error saving guide:", error);
+        res.status(500).send("Internal server error");
+    }
 });
 
 app.listen(process.env.PORT);
