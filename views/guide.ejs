@@ -12,7 +12,21 @@
         <div class="guidePage">
             <div class="sidebar">
                 <a href="/">Home</a>
-                <a href="/login">Log In</a>
+                <% if (user && guide.userId) { %>
+                    <% if (user._id.toString() === guide.userId.toString()) { %>
+                        <a href="/editGuide/<%= guide._id %>">Edit Guide</a>
+                    <% } %>
+                <% } %>
+                <% if (user) { %>
+                    <a href="/logout">Log Out</a>
+                <% } else { %>
+                    <a href="/login">Log In</a>
+                <% } %>
+                
+                <h3>Sections</h3>
+                <% for (let i = 0; i < guide.sections.length; i++) { %>
+                    <a href="#section-<%= i %>"><%= guide.sections[i].header %></a> <!-- Create links to each section -->
+                <% } %>
             </div>
             <div class="guideContent">
                 <h1><%= guide.title %></h1> <!-- Display the guide title -->
@@ -20,7 +34,7 @@
                 
                 <!-- Loop through the sections to display headers, descriptions, and images -->
                 <% for (let i = 0; i < guide.sections.length; i++) { %>
-                    <div class="section">
+                    <div class="section" id="section-<%= i %>"> <!-- Add an ID for scrolling -->
                         <h2><%= guide.sections[i].header %></h2> <!-- Section header -->
                         <p><%= guide.sections[i].description %></p> <!-- Section description -->
                         <% if (guide.sections[i].image) { %>
@@ -29,8 +43,7 @@
                     </div>
                 <% } %>
 
-                <!-- Display the creator's email -->
-                <p><strong>Created by:</strong> <%= user.email %></p> <!-- Display the user's email -->
+                
             </div>
         </div>
     </div>

@@ -91,14 +91,14 @@ app.use((req, res, next) => {
   const token = req.cookies.token;
 
   if (token) {
-    try {
-      const verifiedUser = jwt.verify(token, secretKey);
-      res.locals.user = verifiedUser;
-    } catch (error) {
-      res.locals.user = null;
-    }
+      try {
+          const verifiedUser = jwt.verify(token, secretKey);
+          res.locals.user = verifiedUser;
+      } catch (error) {
+          res.locals.user = null;
+      }
   } else {
-    res.locals.user = null;
+      res.locals.user = null;
   }
 
   next();
@@ -216,17 +216,18 @@ app.get("/guide", (req, res) => {
 
 app.get("/guide/:id", async (req, res) => {
   try {
-    const guideId = req.params.id;
-    const guide = await Guides.findById(guideId);
+      const guideId = req.params.id;
+      const guide = await Guides.findById(guideId).populate('userId');
 
-    if (!guide) {
-      return res.status(404).render('404', { message: 'Guide not found.' });
-    }
+      if (!guide) {
+          return res.status(404).render('404', { message: 'Guide not found.' });
+      }
 
-    res.render("guide", { guide });
+      // Pass the authenticated user info (if exists) to the template
+      res.render("guide", { guide, user: req.user });
   } catch (error) {
-    console.error("Error fetching guide:", error);
-    res.status(500).render('404', { message: 'Server error. Please try again later.' });
+      console.error("Error fetching guide:", error);
+      res.status(500).render('404', { message: 'Server error. Please try again later.' });
   }
 });
 
@@ -276,9 +277,57 @@ app.post("/newGuide", verifyToken, uploads.any(), async (req, res) => {
   }
 });
 
+app.get('/editGuide/:id', async (req, res) => {
+  const guideId = req.params.id;
+  const userId = req.user._id; // Assuming req.user contains the logged-in user
+
+  try {
+      const guide = await Guides.findById(guideId).populate('userId');
+      if (!guide) {
+          return res.status(404).send('Guide not found');
+      }
+
+      // Check if the logged-in user is the creator of the guide
+      if (!guide.userId.equals(userId)) {
+          return res.status(403).send('You do not have permission to edit this guide');
+      }
+
+      res.render('edit-guide', { guide });
+  } catch (error) {
+      res.status(500).send('Server error');
+  }
+});
+
+// Add this route to handle the update of the guide
+app.post('/editGuide/:id', verifyToken, uploads.any(), async (req, res) => {
+  const guideId = req.params.id;
+
+  try {
+    const sections = req.body.header.map((header, index) => ({
+      header,
+      description: req.body.description ? req.body.description[index] : null,
+      image: req.files.find((file) => file.fieldname === `image[${index}]`) 
+        ? req.files.find((file) => file.fieldname === `image[${index}]`).filename 
+        : null,
+    }));
+
+    await Guides.findByIdAndUpdate(guideId, {
+      title: req.body.title,
+      tag: req.body.tag,
+      sections,
+    });
+
+    res.redirect(`/guide/${guideId}`); // Redirect to the updated guide
+  } catch (error) {
+    console.error("Error updating guide:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
 app.get("/logout", (req, res) => {
   res.clearCookie("token"); // Clear the token cookie
   res.redirect("/"); // Redirect to home or login page
+
 });
 
 app.use((req, res) => {
