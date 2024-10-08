@@ -5,46 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
     <link rel="stylesheet" href="/css/style.css">
-    <title>Guidene</title>
+    <title>Guides</title>
 </head>
 <body>
     <div class="main-content">
         <%- include("partials/navbar") %>
         <div class="main-title">
-            <h1>Guide</h1>
+            <h1>Guides</h1>
             <input type="text" name="search" id="search" placeholder="search...">
         </div>
         <div id="guideContainer">
             <% guides.forEach(guide => { %> 
-                <div class="guideBox">
+                <div class="guideBox" data-title="<%= guide.title %>">
                     <a href="/guide/<%= guide._id %>"><%= guide.title %></a> 
                 </div>
             <% }) %>
         </div>
     </div>
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const searchInput = document.getElementById('search');
-        const guideContainer = document.getElementById('guideContainer');
-        const guideBoxes = guideContainer.getElementsByClassName('guideBox');
-        console.log("Loaded Search");
-        
-
-        searchInput.addEventListener('input', () => {
-            const filter = searchInput.value.toLowerCase(); // Get the current input value
-            console.log("Changed to lowercase");
-
-            Array.from(guideBoxes).forEach(guideBox => {
-                const title = guideBox.getAttribute('data-title').toLowerCase(); // Get the title from data attribute
-
-                if (title.includes(filter)) {
-                    guideBox.style.display = ''; // Show the guide box
-                } else {
-                    guideBox.style.display = 'none'; // Hide the guide box
-                }
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search');
+            const guideContainer = document.getElementById('guideContainer');
+            const guideBoxes = guideContainer.getElementsByClassName('guideBox');
+            console.log("Loaded Search");
+    
+            searchInput.addEventListener('input', () => {
+                const filter = searchInput.value.toLowerCase(); // Get the current input value
+                console.log("Changed to lowercase", filter); // Fixed the console log to use 'filter'
+                console.log(guideBoxes);
+                
+    
+                Array.from(guideBoxes).forEach(guideBox => {
+                    const title = guideBox.getAttribute('data-title');
+                    
+                    // Only proceed if the title exists and is not null
+                    if (title) {
+                        if (title.toLowerCase().includes(filter)) {
+                            guideBox.style.display = ''; // Show the guide box
+                        } else {
+                            guideBox.style.display = 'none'; // Hide the guide box
+                        }
+                    }
+                });
             });
-        });
         });
     </script>
 </body>
-</html>w
+</html>

@@ -1,6 +1,12 @@
 <nav>
     <ul class="navbar">
         <a id="logoHolder" href="/"><img src="../../openBook.svg" alt="Logo"></a>
-        <a href="/login">Log In</a>
+
+        <% if (user) { %>
+            <li>Welcome, <%= user.email %></li> <!-- Display the email -->
+            <a href="/logout">Log Out</a> <!-- Log out link -->
+        <% } else { %>
+            <a href="/login">Log In</a>
+        <% } %>
     </ul>
 </nav>

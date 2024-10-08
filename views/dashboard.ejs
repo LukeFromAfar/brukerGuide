@@ -16,6 +16,19 @@
                 <h1>Dashboard</h1>
 
                 <a href="/newGuide">Create new guide</a>
+
+                <h2>Your Guides</h2>
+                <ul>
+                    <% if (guides && guides.length > 0) { %>
+                        <% guides.forEach(guide => { %>
+                            <li>
+                                <a href="/guide/<%= guide._id %>"><%= guide.title %></a>
+                            </li>
+                        <% }); %>
+                    <% } else { %>
+                        <li>No guides found.</li>
+                    <% } %>
+                </ul>
             </div>
         </div>
     </div>
