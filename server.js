@@ -54,15 +54,19 @@ app.use(express.urlencoded({ extended: true }));
 function verifyToken(req, res, next) {
   const token = req.cookies.token;
   if (!token) {
-      return res.status(403).send('Access Denied: No Token Provided!');
+    return res.status(403).render('404', { message: 'Access Denied: No Token Provided!' });
   }
 
   try {
-      const verified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-      req.user = verified; // This should have the user details
-      next();
+    const verified = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.user = verified; // Attach the user details to req.user
+    next();
   } catch (error) {
-      return res.status(401).send('Invalid Token');
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).render('404', { message: 'Your session has expired. Please log in again.' });
+    } else {
+      return res.status(401).render('404', { message: 'Invalid token. Please try again.' });
+    }
   }
 }
 
@@ -83,10 +87,28 @@ function checkIfAuthenticated(req, res, next) {
   }
 }
 
+app.use((req, res, next) => {
+  const token = req.cookies.token;
+
+  if (token) {
+    try {
+      const verifiedUser = jwt.verify(token, secretKey);
+      res.locals.user = verifiedUser;
+    } catch (error) {
+      res.locals.user = null;
+    }
+  } else {
+    res.locals.user = null;
+  }
+
+  next();
+});
+
 // Protect the newGuide route
 app.get("/newGuide", verifyToken, (req, res) => {
   res.render("newGuide");
 });
+
 
 
 mongoose
@@ -98,8 +120,8 @@ const saltRounds = 10;
 
 app.get("/", async (req, res) => {
   try {
-    const guides = await Guides.find(); // Fetch all guides from the database
-    res.render("index", { guides }); // Pass the guides to the index view
+    const guides = await Guides.find();
+    res.render("index", { guides }); // No need to pass `user` anymore
   } catch (error) {
     console.error("Error fetching guides:", error);
     res.status(500).send("Internal server error");
@@ -195,16 +217,16 @@ app.get("/guide", (req, res) => {
 app.get("/guide/:id", async (req, res) => {
   try {
     const guideId = req.params.id;
-    const guide = await Guides.findById(guideId); // Fetch the guide from the database
+    const guide = await Guides.findById(guideId);
 
     if (!guide) {
-      return res.status(404).send("Guide not found");
+      return res.status(404).render('404', { message: 'Guide not found.' });
     }
 
-    res.render("guide", { guide }); // Pass the guide object to the template
+    res.render("guide", { guide });
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Server error");
+    console.error("Error fetching guide:", error);
+    res.status(500).render('404', { message: 'Server error. Please try again later.' });
   }
 });
 
@@ -224,36 +246,7 @@ app.get("/newGuide", (req, res) => {
   res.render("newGuide");
 });
 
-// app.post("/newGuide", uploads.any(), async (req, res) => {
-//   console.log(req.body, "BODY");
-//   console.log(req.files, "FILES");
-
-//   // Process each section data
-//   const sections = req.body.header.map((header, index) => ({
-//     header,
-//     description: req.body.description ? req.body.description[index] : null, // Optional description
-//     image: req.files.find((file) => file.fieldname === `image[${index}]`)
-//       ? req.files.find((file) => file.fieldname === `image[${index}]`).filename
-//       : null, // Optional image
-//   }));
-
-//   const newGuide = new Guides({
-//     title: req.body.title,
-//     tag: req.body.tag,
-//     sections,
-//   });
-
-//   try {
-//     const result = await newGuide.save();
-//     // res.status(201).send({ message: "Guide created successfully", data: result });
-//     res.redirect("/");
-//   } catch (error) {
-//     console.error("Error saving guide:", error);
-//     res.status(500).send("Internal server error");
-//   }
-// });
-
-app.post("/newGuide", uploads.any(), async (req, res) => {
+app.post("/newGuide", verifyToken, uploads.any(), async (req, res) => {
   const userId = req.user.id; // Get the user ID from the request object
   console.log(req.body, "BODY");
   console.log(req.files, "FILES");
@@ -271,7 +264,7 @@ app.post("/newGuide", uploads.any(), async (req, res) => {
     title: req.body.title,
     tag: req.body.tag,
     sections,
-    userId: req.user.id
+    userId: userId,  // Save the user's ID from req.user
   });
 
   try {
@@ -281,6 +274,15 @@ app.post("/newGuide", uploads.any(), async (req, res) => {
     console.error("Error saving guide:", error);
     res.status(500).send("Internal server error");
   }
+});
+
+app.get("/logout", (req, res) => {
+  res.clearCookie("token"); // Clear the token cookie
+  res.redirect("/"); // Redirect to home or login page
+});
+
+app.use((req, res) => {
+  res.status(404).render('404', { message: 'Page not found.' });
 });
 
 app.listen(process.env.PORT);

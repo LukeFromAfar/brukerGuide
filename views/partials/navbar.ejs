@@ -4,9 +4,10 @@
 
         <% if (user) { %>
             <li>Welcome, <%= user.email %></li> <!-- Display the email -->
-            <a href="/logout">Log Out</a> <!-- Log out link -->
+            <li><a href="/dashboard">Dashboard</a></li> <!-- Dashboard button -->
+            <li><a href="/logout">Log Out</a></li> <!-- Log out link -->
         <% } else { %>
-            <a href="/login">Log In</a>
+            <li><a href="/login">Log In</a></li> <!-- Log in link -->
         <% } %>
     </ul>
 </nav>
