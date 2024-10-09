@@ -87,29 +87,32 @@ function checkIfAuthenticated(req, res, next) {
   }
 }
 
-app.use((req, res, next) => {
-  const token = req.cookies.token;
+// Middleware to verify JWT and set user information
+function verifyToken(req, res, next) {
+  const token = req.cookies.token; // Assuming the token is stored in a cookie
 
   if (token) {
       try {
-          const verifiedUser = jwt.verify(token, secretKey);
-          res.locals.user = verifiedUser;
-      } catch (error) {
-          res.locals.user = null;
+          const verifiedUser = jwt.verify(token, process.env.JWT_SECRET_KEY);
+          req.user = verifiedUser;       // Attach user data to req.user
+          res.locals.user = verifiedUser; // Attach user data to res.locals.user
+      } catch (err) {
+          req.user = null;               // Invalid token, user is undefined
+          res.locals.user = null;        // Invalid token, user is undefined
       }
   } else {
-      res.locals.user = null;
+      req.user = null;                 // No token, no user
+      res.locals.user = null;          // No token, no user
   }
-
   next();
-});
+}
+
+app.use(verifyToken);
 
 // Protect the newGuide route
 app.get("/newGuide", verifyToken, (req, res) => {
   res.render("newGuide");
 });
-
-
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/userGuide")
@@ -216,18 +219,18 @@ app.get("/guide", (req, res) => {
 
 app.get("/guide/:id", async (req, res) => {
   try {
-      const guideId = req.params.id;
-      const guide = await Guides.findById(guideId).populate('userId');
+    const guideId = req.params.id;
+    const guide = await Guides.findById(guideId).populate('userId'); // Ensure userId is populated
 
-      if (!guide) {
-          return res.status(404).render('404', { message: 'Guide not found.' });
-      }
+    if (!guide) {
+      return res.status(404).render('404', { message: 'Guide not found.', user: req.user });
+    }
 
-      // Pass the authenticated user info (if exists) to the template
-      res.render("guide", { guide, user: req.user });
+    // Render the guide and pass the user info
+    res.render("guide", { guide, user: req.user });
   } catch (error) {
-      console.error("Error fetching guide:", error);
-      res.status(500).render('404', { message: 'Server error. Please try again later.' });
+    console.error("Error fetching guide:", error);
+    res.status(500).render('404', { message: 'Server error. Please try again later.', user: req.user });
   }
 });
 
@@ -277,30 +280,33 @@ app.post("/newGuide", verifyToken, uploads.any(), async (req, res) => {
   }
 });
 
-app.get('/editGuide/:id', async (req, res) => {
+app.get('/guide/:id/edit', verifyToken, async (req, res) => {
   const guideId = req.params.id;
-  const userId = req.user._id; // Assuming req.user contains the logged-in user
+  const userId = req.user._id; // Get the logged-in user's ID
 
   try {
-      const guide = await Guides.findById(guideId).populate('userId');
+      const guide = await Guides.findById(guideId).populate('userId'); // Populate userId to access creator info
+
       if (!guide) {
           return res.status(404).send('Guide not found');
       }
 
       // Check if the logged-in user is the creator of the guide
       if (!guide.userId.equals(userId)) {
-          return res.status(403).send('You do not have permission to edit this guide');
+          // return res.status(403).send('You do not have permission to edit this guide');
+          console.log(guide.userId, userId);
+          
       }
 
-      res.render('edit-guide', { guide });
+      res.render('editGuide', { guide });
   } catch (error) {
+      console.error("Error fetching guide for editing:", error);
       res.status(500).send('Server error');
   }
 });
 
-// Add this route to handle the update of the guide
-app.post('/editGuide/:id', verifyToken, uploads.any(), async (req, res) => {
-  const guideId = req.params.id;
+app.post('/guide/:id/edit', verifyToken, uploads.any(), async (req, res) => {
+  const guideId = req.params.id; // Make sure to use req.params.id instead of req.params._id
 
   try {
     const sections = req.body.header.map((header, index) => ({

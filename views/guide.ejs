@@ -12,20 +12,16 @@
         <div class="guidePage">
             <div class="sidebar">
                 <a href="/">Home</a>
-                <% if (user && guide.userId) { %>
-                    <% if (user._id.toString() === guide.userId.toString()) { %>
-                        <a href="/editGuide/<%= guide._id %>">Edit Guide</a>
-                    <% } %>
-                <% } %>
                 <% if (user) { %>
+                        <a href="/guide/<%= guide._id %>/edit">Edit Guide</a>
                     <a href="/logout">Log Out</a>
                 <% } else { %>
                     <a href="/login">Log In</a>
                 <% } %>
-                
+            
                 <h3>Sections</h3>
                 <% for (let i = 0; i < guide.sections.length; i++) { %>
-                    <a href="#section-<%= i %>"><%= guide.sections[i].header %></a> <!-- Create links to each section -->
+                    <a href="#section-<%= i %>"><%= guide.sections[i].header %></a>
                 <% } %>
             </div>
             <div class="guideContent">
@@ -43,9 +39,19 @@
                     </div>
                 <% } %>
 
+                <div class="guide-creator">
+                    <h4>Created by: <%= guide.userId.email %></h4> <!-- Assuming you want to show the email -->
+                </div>
+
                 
             </div>
         </div>
     </div>
+    
+    <!-- Displaying the creator of the guide -->
+    <div class="guide-creator">
+        <h4>Created by: <%= guide.userId.email %></h4> <!-- Assuming you want to show the email -->
+    </div>
+
 </body>
 </html>
