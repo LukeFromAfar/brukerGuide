@@ -7,6 +7,7 @@ const multer = require("multer");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
+const fs = require('fs');
 
 app.use(cookieParser());
 
@@ -20,24 +21,19 @@ const diskStorage = multer.diskStorage({
     cb(null, "uploads/"); // Specify the upload folder
   },
   filename: function (req, file, cb) {
-    // Declare and get the file extension
     const ext = path.extname(file.originalname);
     console.log("EXT", ext);
-
-    // Generate a unique filename using a timestamp and the original extension
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, file.fieldname + "-" + uniqueSuffix + ext);
   },
 });
 
-const uploads = multer({
+const upload = multer({
   storage: diskStorage,
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif/; // Allowed file types
     const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
     if (mimetype && extname) {
       return cb(null, true);
@@ -250,7 +246,7 @@ app.get("/newGuide", (req, res) => {
   res.render("newGuide");
 });
 
-app.post("/newGuide", verifyToken, uploads.any(), async (req, res) => {
+app.post("/newGuide", verifyToken, upload.any(), async (req, res) => {
   const userId = req.user.id; // Get the user ID from the request object
   console.log(req.body, "BODY");
   console.log(req.files, "FILES");
@@ -294,7 +290,7 @@ app.get('/guide/:id/edit', verifyToken, async (req, res) => {
       // Check if the logged-in user is the creator of the guide
       if (!guide.userId.equals(userId)) {
           // return res.status(403).send('You do not have permission to edit this guide');
-          console.log(guide.userId, userId);
+          console.log(297, guide.userId, userId);
           
       }
 
@@ -305,28 +301,104 @@ app.get('/guide/:id/edit', verifyToken, async (req, res) => {
   }
 });
 
-app.post('/guide/:id/edit', verifyToken, uploads.any(), async (req, res) => {
-  const guideId = req.params.id; // Make sure to use req.params.id instead of req.params._id
+app.post('/guide/:id/edit', upload.fields([
+  { name: 'image[]', maxCount: 5 }, // New images
+  { name: 'existingImage[]', maxCount: 5 } // Existing images to keep
+]), async (req, res) => {
+  const guideId = req.params.id;
+  const { title, tag, header, description } = req.body;
+
+  console.log("Request Body:", req.body); // Log request body
+  console.log("Request Files:", req.files); // Log request files
+
+  // Flatten existing images to a single array
+  const existingImages = Array.isArray(req.body['existingImage[]'])
+    ? req.body['existingImage[]']
+    : [req.body['existingImage[]']].filter(Boolean); // Handle single existing image case
 
   try {
-    const sections = req.body.header.map((header, index) => ({
-      header,
-      description: req.body.description ? req.body.description[index] : null,
-      image: req.files.find((file) => file.fieldname === `image[${index}]`) 
-        ? req.files.find((file) => file.fieldname === `image[${index}]`).filename 
-        : null,
-    }));
+    const guide = await Guides.findById(guideId);
+    if (!guide) {
+      console.error(`Guide not found with ID: ${guideId}`);
+      return res.status(404).send("Guide not found");
+    }
 
-    await Guides.findByIdAndUpdate(guideId, {
-      title: req.body.title,
-      tag: req.body.tag,
-      sections,
+    // Update guide properties
+    guide.title = title;
+    guide.tag = tag;
+
+    // Get uploaded images
+    const uploadedImages = req.files['image[]'] || []; // Handle case where no new images are uploaded
+    console.log("Uploaded Images:", uploadedImages); // Log uploaded images
+
+    // Handle image deletion
+    if (existingImages.length > 0) {
+      existingImages.forEach((image, index) => {
+        if (!newImages[index]) { // If no new image was uploaded in its place
+            const imagePath = path.join(__dirname, 'uploads', image);
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    console.error(`Failed to delete image: ${imagePath}`, err);
+                } else {
+                    console.log(`Deleted image: ${imagePath}`);
+                }
+            });
+        }
+    });
+    }
+
+    // Update sections with headers, descriptions, and images
+    guide.sections = header.map((headerText, index) => {
+      const uploadedImage = uploadedImages[index] ? uploadedImages[index].filename : null;
+      console.log(`Section ${index}: Uploaded Image:`, uploadedImage);
+      console.log(`Section ${index}: Existing Image:`, existingImages[index]);
+
+      return {
+        header: headerText,
+        description: description[index],
+        image: uploadedImage || existingImages[index] || '', // Use existing image or an empty string
+      };
     });
 
-    res.redirect(`/guide/${guideId}`); // Redirect to the updated guide
+    await guide.save();
+    res.redirect(`/guide/${guideId}`);
   } catch (error) {
     console.error("Error updating guide:", error);
-    res.status(500).send("Internal server error");
+    res.status(500).send("Error updating guide");
+  }
+});
+
+app.delete("/guide/:id", verifyToken, async (req, res) => {
+  const guideId = req.params.id;
+
+  try {
+      // Find the guide to get its associated images
+      const guide = await Guides.findById(guideId);
+
+      if (!guide) {
+          return res.status(404).json({ message: "Guide not found" });
+      }
+
+      // Loop through the sections and delete images
+      guide.sections.forEach(section => {
+          if (section.image) {
+              const imagePath = path.join(__dirname, 'uploads', section.image);
+              fs.unlink(imagePath, (err) => {
+                  if (err) {
+                      console.error(`Failed to delete image: ${imagePath}`, err);
+                  } else {
+                      console.log(`Successfully deleted image: ${imagePath}`);
+                  }
+              });
+          }
+      });
+
+      // Delete the guide from the database
+      await Guides.findByIdAndDelete(guideId);
+      res.status(200).json({ message: "Guide deleted successfully" });
+  } catch (error) {
+      console.error("Error deleting guide:", error);
+      res.status(500).json({ message: "Internal server error" });
   }
 });
 

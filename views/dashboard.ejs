@@ -8,21 +8,19 @@
     <title>Guide</title>
 </head>
 <body>
-    <%- include ("partials/navbar") %>
+    <%- include("partials/navbar") %>
     <div class="main-content">
         <div class="guidePage">
-            
             <div class="guideContent">
                 <h1>Dashboard</h1>
-
                 <a href="/newGuide">Create new guide</a>
-
                 <h2>Your Guides</h2>
                 <ul>
                     <% if (guides && guides.length > 0) { %>
                         <% guides.forEach(guide => { %>
                             <li>
                                 <a href="/guide/<%= guide._id %>"><%= guide.title %></a>
+                                <button type="button" onclick="deleteGuide('<%= guide._id %>')">Delete Guide</button>
                             </li>
                         <% }); %>
                     <% } else { %>
@@ -32,5 +30,34 @@
             </div>
         </div>
     </div>
+    <script>
+        function deleteGuide(guideId) {
+    if (confirm('Are you sure you want to delete this guide?')) { // Confirm before deleting
+        fetch(`/guide/${guideId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getCookie('token')}` // Fetch the token from cookies
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Guide deleted successfully');
+                window.location.reload(); // Reload the page to reflect changes
+            } else {
+                alert('Failed to delete the guide');
+            }
+        })
+        .catch(error => console.error('Error deleting guide:', error));
+    }
+}
+
+// Utility function to get cookie by name
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+    </script>
 </body>
 </html>

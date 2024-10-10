@@ -8,7 +8,7 @@
     <title>Edit <%= guide.title %></title>
 </head>
 <body>
-    <%- include ("partials/navbar") %>
+    <%- include("partials/navbar") %>
     <div class="main-content">
         <h1>Edit Guide</h1>
         <form action="/guide/<%= guide._id %>/edit" method="POST" enctype="multipart/form-data">
@@ -22,7 +22,7 @@
             </div>
             <div id="addNewSection">
                 <% guide.sections.forEach((section, index) => { %>
-                    <div name="section">
+                    <div class="section">
                         <h2>Section <%= index + 1 %></h2>
                         <div>
                             <label for="header">Header</label>
@@ -34,8 +34,9 @@
                         </div>
                         <div>
                             <label for="image">Image</label>
-                            <input type="file" name="image[<%= index %>]" id="image-<%= index %>" accept="image/png, image/jpeg, image/jpg">
+                            <input type="file" name="image[]" id="image-<%= index %>" accept="image/png, image/jpeg, image/jpg">
                             <% if (section.image) { %>
+                                <input type="hidden" name="existingImage[]" value="<%= section.image %>"> <!-- For existing images -->
                                 <p>Current Image: <img src="/uploads/<%= section.image %>" alt="<%= section.header %> image" style="max-width: 100px;"></p>
                             <% } %>
                         </div>
@@ -44,12 +45,12 @@
             </div>
             <button type="submit">Update Guide</button>
         </form>
-        <button onclick="addNewSection()">Create new section</button> <!-- Corrected function name -->
+        <button type="button" onclick="addNewSection()">Add Section</button>
     </div>
-    
+
     <script>
         let sectionIndex = <%= guide.sections.length %>;
-    
+
         function addNewSection() {
             const addNewSectionContainer = document.getElementById("addNewSection");
             sectionIndex++;
@@ -67,7 +68,7 @@
                     </div>
                     <div>
                         <label for="image">Image</label>
-                        <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
+                        <input type="file" name="image[]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
                     </div>
                 </div>
             `;

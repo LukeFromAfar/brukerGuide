@@ -33,7 +33,7 @@
                     </div>
                     <div>
                         <label for="image">Image</label>
-                        <input type="file" name="image[0]" id="image-0" accept="image/png, image/jpeg, image/jpg" >
+                        <input type="file" name="image[0]" id="image-0" accept="image/png, image/jpeg, image/jpg">
                     </div>
                 </div>
             </div>
@@ -44,49 +44,67 @@
 
     <script>
         let sectionIndex = 1; // Start with section 1 (0-indexed)
-    
+        
+        // To store the file input selections
+        let filesData = {};
+
+        // Save selected files when a file is chosen
+        document.addEventListener('change', (event) => {
+            if (event.target.type === 'file') {
+                const index = event.target.id.split('-')[1]; // Get the section index from the id
+                filesData[`image-${index}`] = event.target.files[0]; // Store the file
+            }
+        });
+
         function newSection() {
-    // Collect current input values (only text fields, not file inputs)
-    const inputs = document.querySelectorAll('input[type="text"]');
-    let values = {};
-    inputs.forEach(input => {
-        values[input.id] = input.value; // Save current values by input ID
-    });
+            // Collect current input values (only text fields, not file inputs)
+            const inputs = document.querySelectorAll('input[type="text"]');
+            let values = {};
+            inputs.forEach(input => {
+                values[input.id] = input.value; // Save current values by input ID
+            });
 
-    let addNewSection = document.getElementById("addNewSection");
+            let addNewSection = document.getElementById("addNewSection");
 
-    // Increment the section index
-    sectionIndex++;
+            // Increment the section index
+            sectionIndex++;
 
-    // Append a new section with indexed inputs
-    addNewSection.innerHTML += `
-        <div name="section">
-            <h2>Section ${sectionIndex}</h2>
-            <div>
-                <label for="header">Header</label>
-                <input type="text" name="header[${sectionIndex - 1}]" id="header-${sectionIndex - 1}" required>
-            </div>
-            <div>
-                <label for="description">Description</label>
-                <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}">
-            </div>
-            <div>
-                <label for="image">Image</label>
-                <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
-            </div>
-        </div>
-    `;
+            // Append a new section with indexed inputs
+            addNewSection.innerHTML += `
+                <div name="section">
+                    <h2>Section ${sectionIndex}</h2>
+                    <div>
+                        <label for="header">Header</label>
+                        <input type="text" name="header[${sectionIndex - 1}]" id="header-${sectionIndex - 1}" required>
+                    </div>
+                    <div>
+                        <label for="description">Description</label>
+                        <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}">
+                    </div>
+                    <div>
+                        <label for="image">Image</label>
+                        <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
+                    </div>
+                </div>
+            `;
 
-    // Restore the values in existing fields (non-file fields)
-    inputs.forEach(input => {
-        if (values[input.id]) {
-            document.getElementById(input.id).value = values[input.id]; // Set saved values back into fields
+            // Restore the values in existing fields (non-file fields)
+            inputs.forEach(input => {
+                if (values[input.id]) {
+                    document.getElementById(input.id).value = values[input.id]; // Set saved values back into fields
+                }
+            });
+
+            // Restore file input values for previous sections (if they had been selected)
+            for (const key in filesData) {
+                const inputElement = document.getElementById(key);
+                if (inputElement && filesData[key]) {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(filesData[key]); // Re-add the selected file
+                    inputElement.files = dataTransfer.files; // Assign the file back to the input
+                }
+            }
         }
-    });
-
-    // Prompt user to re-select images for already created sections if necessary
-    alert("Please re-select any images for previous sections after adding a new one.");
-}
     </script>
 </body>
 </html>
