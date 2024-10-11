@@ -7,7 +7,9 @@ const multer = require("multer");
 const path = require("path");
 const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
-const fs = require('fs');
+const fs = require('fs').promises;
+
+const verifyToken = require("./functions/verifyToken.js")
 
 app.use(cookieParser());
 
@@ -16,30 +18,25 @@ const secretKey = process.env.JWT_SECRET_KEY;
 
 const Schema = mongoose.Schema;
 
-const diskStorage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Specify the upload folder
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    console.log("EXT", ext);
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-  },
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
 });
 
 const upload = multer({
-  storage: diskStorage,
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|gif/; // Allowed file types
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-
-    if (mimetype && extname) {
-      return cb(null, true);
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + '-' + file.originalname);
     }
-    cb(new Error("Error: File type not supported"));
-  },
+  })
 });
 
 app.set("view engine", "ejs");
@@ -47,24 +44,7 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-function verifyToken(req, res, next) {
-  const token = req.cookies.token;
-  if (!token) {
-    return res.status(403).render('404', { message: 'Access Denied: No Token Provided!' });
-  }
 
-  try {
-    const verified = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user = verified; // Attach the user details to req.user
-    next();
-  } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).render('404', { message: 'Your session has expired. Please log in again.' });
-    } else {
-      return res.status(401).render('404', { message: 'Invalid token. Please try again.' });
-    }
-  }
-}
 
 function checkIfAuthenticated(req, res, next) {
   const token = req.cookies.token || req.headers['authorization'];
@@ -81,26 +61,6 @@ function checkIfAuthenticated(req, res, next) {
       // No token found, proceed to login
       next();
   }
-}
-
-// Middleware to verify JWT and set user information
-function verifyToken(req, res, next) {
-  const token = req.cookies.token; // Assuming the token is stored in a cookie
-
-  if (token) {
-      try {
-          const verifiedUser = jwt.verify(token, process.env.JWT_SECRET_KEY);
-          req.user = verifiedUser;       // Attach user data to req.user
-          res.locals.user = verifiedUser; // Attach user data to res.locals.user
-      } catch (err) {
-          req.user = null;               // Invalid token, user is undefined
-          res.locals.user = null;        // Invalid token, user is undefined
-      }
-  } else {
-      req.user = null;                 // No token, no user
-      res.locals.user = null;          // No token, no user
-  }
-  next();
 }
 
 app.use(verifyToken);
@@ -301,64 +261,55 @@ app.get('/guide/:id/edit', verifyToken, async (req, res) => {
   }
 });
 
-app.post('/guide/:id/edit', upload.fields([
-  { name: 'image[]', maxCount: 5 }, // New images
-  { name: 'existingImage[]', maxCount: 5 } // Existing images to keep
-]), async (req, res) => {
+app.post('/guide/:id/edit', upload.array('image'), async (req, res) => {
   const guideId = req.params.id;
-  const { title, tag, header, description } = req.body;
-
-  console.log("Request Body:", req.body); // Log request body
-  console.log("Request Files:", req.files); // Log request files
-
-  // Flatten existing images to a single array
-  const existingImages = Array.isArray(req.body['existingImage[]'])
-    ? req.body['existingImage[]']
-    : [req.body['existingImage[]']].filter(Boolean); // Handle single existing image case
+  const { title, tag, header, description, existingImage } = req.body;
+  const uploadedFiles = req.files || [];
 
   try {
     const guide = await Guides.findById(guideId);
     if (!guide) {
-      console.error(`Guide not found with ID: ${guideId}`);
       return res.status(404).send("Guide not found");
     }
 
-    // Update guide properties
+    // Store old image filenames for later comparison
+    const oldImages = guide.sections.map(section => section.image).filter(Boolean);
+
     guide.title = title;
     guide.tag = tag;
 
-    // Get uploaded images
-    const uploadedImages = req.files['image[]'] || []; // Handle case where no new images are uploaded
-    console.log("Uploaded Images:", uploadedImages); // Log uploaded images
-
-    // Handle image deletion
-    if (existingImages.length > 0) {
-      existingImages.forEach((image, index) => {
-        if (!newImages[index]) { // If no new image was uploaded in its place
-            const imagePath = path.join(__dirname, 'uploads', image);
-            fs.unlink(imagePath, (err) => {
-                if (err) {
-                    console.error(`Failed to delete image: ${imagePath}`, err);
-                } else {
-                    console.log(`Deleted image: ${imagePath}`);
-                }
-            });
-        }
-    });
-    }
-
-    // Update sections with headers, descriptions, and images
     guide.sections = header.map((headerText, index) => {
-      const uploadedImage = uploadedImages[index] ? uploadedImages[index].filename : null;
-      console.log(`Section ${index}: Uploaded Image:`, uploadedImage);
-      console.log(`Section ${index}: Existing Image:`, existingImages[index]);
+      let imageFilename = existingImage ? existingImage[index] || '' : '';
+
+      // Check if a new image was uploaded for this section
+      const newImage = uploadedFiles[index];
+      if (newImage) {
+        imageFilename = newImage.filename;
+      }
 
       return {
         header: headerText,
         description: description[index],
-        image: uploadedImage || existingImages[index] || '', // Use existing image or an empty string
+        image: imageFilename
       };
     });
+
+    // Get the new set of image filenames
+    const newImages = guide.sections.map(section => section.image).filter(Boolean);
+
+    // Find images that are no longer used
+    const imagesToDelete = oldImages.filter(img => !newImages.includes(img));
+
+    // Delete unused images
+    for (const img of imagesToDelete) {
+      const imgPath = path.join(__dirname, 'uploads', img);
+      try {
+        await fs.unlink(imgPath);
+        console.log(`Deleted unused image: ${img}`);
+      } catch (err) {
+        console.error(`Failed to delete image ${img}:`, err);
+      }
+    }
 
     await guide.save();
     res.redirect(`/guide/${guideId}`);
