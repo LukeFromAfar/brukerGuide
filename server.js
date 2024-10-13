@@ -261,7 +261,7 @@ app.get('/guide/:id/edit', verifyToken, async (req, res) => {
   }
 });
 
-app.post('/guide/:id/edit', upload.array('image'), async (req, res) => {
+app.post('/guide/:id/edit', upload.any(), async (req, res) => {
   const guideId = req.params.id;
   const { title, tag, header, description, existingImage } = req.body;
   const uploadedFiles = req.files || [];
@@ -272,46 +272,30 @@ app.post('/guide/:id/edit', upload.array('image'), async (req, res) => {
       return res.status(404).send("Guide not found");
     }
 
-    // Store old image filenames for later comparison
-    const oldImages = guide.sections.map(section => section.image).filter(Boolean);
-
+    // Update guide's title and tag
     guide.title = title;
     guide.tag = tag;
 
+    // Update sections
     guide.sections = header.map((headerText, index) => {
       let imageFilename = existingImage ? existingImage[index] || '' : '';
 
       // Check if a new image was uploaded for this section
-      const newImage = uploadedFiles[index];
+      const newImage = uploadedFiles.find(file => file.fieldname === `image[${index}]`);
       if (newImage) {
-        imageFilename = newImage.filename;
+        imageFilename = newImage.filename; // Set new image filename if uploaded
       }
 
       return {
         header: headerText,
         description: description[index],
-        image: imageFilename
+        image: imageFilename // Either keep the existing image or use the new one
       };
     });
 
-    // Get the new set of image filenames
-    const newImages = guide.sections.map(section => section.image).filter(Boolean);
-
-    // Find images that are no longer used
-    const imagesToDelete = oldImages.filter(img => !newImages.includes(img));
-
-    // Delete unused images
-    for (const img of imagesToDelete) {
-      const imgPath = path.join(__dirname, 'uploads', img);
-      try {
-        await fs.unlink(imgPath);
-        console.log(`Deleted unused image: ${img}`);
-      } catch (err) {
-        console.error(`Failed to delete image ${img}:`, err);
-      }
-    }
-
+    // Save updated guide
     await guide.save();
+
     res.redirect(`/guide/${guideId}`);
   } catch (error) {
     console.error("Error updating guide:", error);

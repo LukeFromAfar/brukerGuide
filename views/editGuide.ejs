@@ -23,26 +23,22 @@
                 </div>
                 <div id="addNewSection">
                     <% guide.sections.forEach((section, index) => { %>
-                        <div name="section">
-                            <h2>Section <%= index + 1 %></h2>
-                            <div>
-                                <label for="header-<%= index %>">Header</label>
-                                <input type="text" name="header[<%= index %>]" id="header-<%= index %>" value="<%= section.header %>" required>
-                            </div>
-                            <div>
-                                <label for="description-<%= index %>">Description</label>
-                                <input type="text" name="description[<%= index %>]" id="description-<%= index %>" value="<%= section.description %>">
-                            </div>
-                            <div>
-                                <label for="image-<%= index %>">Image</label>
-                                <input type="file" name="image" id="image-<%= index %>" accept="image/png, image/jpeg, image/jpg">
-                                <% if (section.image) { %>
-                                    <input type="hidden" name="existingImage[<%= index %>]" value="<%= section.image %>">
-                                    <p>Current Image: <img src="/uploads/<%= section.image %>" alt="<%= section.header %> image" style="max-width: 100px;"></p>
-                                <% } %>
-                            </div>
+                        <div>
+                          <label for="header">Header</label>
+                          <input type="text" name="header[]" value="<%= section.header %>" />
+                          
+                          <label for="description">Description</label>
+                          <input type="text" name="description[]" value="<%= section.description %>" />
+                          
+                          <label for="image">Image</label>
+                          <input type="file" name="image[<%= index %>]" />
+                          
+                          <% if (section.image) { %>
+                            <img src="/uploads/<%= section.image %>" alt="Section Image" />
+                            <input type="hidden" name="existingImage[]" value="<%= section.image %>" />
+                          <% } %>
                         </div>
-                    <% }); %>
+                      <% }) %>
                 </div>
             </div>
             <button type="submit">Update Guide</button>
