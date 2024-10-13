@@ -238,26 +238,24 @@ app.post("/newGuide", verifyToken, upload.any(), async (req, res) => {
 
 app.get('/guide/:id/edit', verifyToken, async (req, res) => {
   const guideId = req.params.id;
-  const userId = req.user._id; // Get the logged-in user's ID
+  const userId = req.user.id; // Get the logged-in user's ID from JWT
 
   try {
-      const guide = await Guides.findById(guideId).populate('userId'); // Populate userId to access creator info
+    const guide = await Guides.findById(guideId).populate('userId'); // Populate userId to access creator info
 
-      if (!guide) {
-          return res.status(404).send('Guide not found');
-      }
+    if (!guide) {
+      return res.status(404).send('Guide not found');
+    }
 
-      // Check if the logged-in user is the creator of the guide
-      if (!guide.userId.equals(userId)) {
-          // return res.status(403).send('You do not have permission to edit this guide');
-          console.log(297, guide.userId, userId);
-          
-      }
+    // Check if the logged-in user is the creator of the guide
+    if (!guide.userId.equals(userId)) {
+      return res.status(403).send('You do not have permission to edit this guide'); // Forbidden access
+    }
 
-      res.render('editGuide', { guide });
+    res.render('editGuide', { guide });
   } catch (error) {
-      console.error("Error fetching guide for editing:", error);
-      res.status(500).send('Server error');
+    console.error("Error fetching guide for editing:", error);
+    res.status(500).send('Server error');
   }
 });
 
