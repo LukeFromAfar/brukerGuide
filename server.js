@@ -170,7 +170,7 @@ app.post("/signup", async (req, res) => {
 });
 
 app.get("/guide", (req, res) => {
-  res.render("guide");
+  res.redirect('/');
 });
 
 app.get("/guide/:id", async (req, res) => {
