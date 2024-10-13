@@ -272,6 +272,9 @@ app.post('/guide/:id/edit', upload.any(), async (req, res) => {
       return res.status(404).send("Guide not found");
     }
 
+    // Store old image filenames for later comparison
+    const oldImages = guide.sections.map(section => section.image).filter(Boolean);
+
     // Update guide's title and tag
     guide.title = title;
     guide.tag = tag;
@@ -292,6 +295,23 @@ app.post('/guide/:id/edit', upload.any(), async (req, res) => {
         image: imageFilename // Either keep the existing image or use the new one
       };
     });
+
+    // Get the new set of image filenames
+    const newImages = guide.sections.map(section => section.image).filter(Boolean);
+
+    // Find images that are no longer used
+    const imagesToDelete = oldImages.filter(img => !newImages.includes(img));
+
+    // Delete unused images
+    for (const img of imagesToDelete) {
+      const imgPath = path.join(__dirname, 'uploads', img);
+      try {
+        await fs.unlink(imgPath); // Remove the old file from /uploads
+        console.log(`Deleted unused image: ${img}`);
+      } catch (err) {
+        console.error(`Failed to delete image ${img}:`, err);
+      }
+    }
 
     // Save updated guide
     await guide.save();
