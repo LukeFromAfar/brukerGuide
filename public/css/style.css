@@ -115,17 +115,6 @@ h1 {
     flex-direction: column;
 }
 
-.guideWSidebar {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    
-}
-
-.guideImage {
-    max-width: 40rem;
-}
-
 .main-title {
     display: flex;
     flex-direction: column;
@@ -140,7 +129,7 @@ h1 {
 .main-title input {
     display: inline-block;
     padding: 0.5rem;
-    width: 50%; 
+    width: 50%;
 }
 
 #guideContainer {
@@ -172,30 +161,31 @@ h1 {
     "sidebar guideContent guideContent guideContent guideContent";
 }
 
+.guideImage {
+    width: 35vw;
+    min-width: 30rem;
+}
+
 .sidebar {
     grid-area: sidebar;
     background-color: var(--darkgray);
     display: flex;
     flex-direction: column;
     font-family: var(--WorkSans);
-    align-items: center; 
-    transition: 0.2s;
+    z-index: 1001;
 }
-
-.sidebar:hover {
-    transition: 0.2s;
-    filter: drop-shadow(5px 0px 50px var(--darkgray));
-}
-
-/* .sidebar:hover ~ .guidePage {
-    
-} */
 
 .sidebarLinks {
     display: flex;
     flex-direction: column;
+    align-items: center;
     position: fixed;
-    margin-right: 140px;
+    left: 10%;
+    transform: translate(-50%, 0);
+    margin-top: 4rem;
+    overflow-y: auto;
+    overflow-x:hidden;
+    height: 90%;
 }
 
 .guideContent {
@@ -203,12 +193,47 @@ h1 {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
 }
 
-.sidebar a {
-    font-size: 2rem;
-    text-align: center;
-    justify-self: end;
+.sidebarLinks h3, .sidebarLinks a {
+    display: inline-block;
+    font-size: 40px;
+    margin: 0px;
+    text-decoration: none;
+    color: var(--white);
+    margin-bottom: 0.7rem;
+    padding: 0.5rem;
+    transition: 0.2s;
+}
+
+.sidebarLinks a:hover {
+    transition: 0.2s;
+    text-shadow: var(--secondary) 1px 0 10px;
+}
+
+.sidebarLinks h3 {
+    margin-top: 1rem;
+    border-top: 0.1rem solid var(--primary);
+    padding-top: 1rem;
+}
+
+.guideWSidebar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+}
+
+.guideWSidebar a {
+    color: var(--white);
+    font-size: 1.4rem;
+}
+
+.guideWSidebar h2 {
+    color: var(--white);
+    font-size: 1.6rem;
 }
 
 .login-content {
@@ -225,6 +250,15 @@ h1 {
     border-radius: 1rem;
     font-size: 1.5rem;
     font-family: var(--WorkSans);
+}
+
+.centerLogin *{
+    margin: 0.5rem;
+}
+
+.submitLogButton {
+    font-size: 1.2rem;
+    cursor: pointer;
 }
 
 .form {
@@ -255,3 +289,92 @@ input[type=submit] {
 .editing {
     align-items: center;
 }
+
+.guideWSidebar h1{
+    font-size: 5rem;
+}
+
+.guideWSidebar h2{
+    font-size: 3rem;
+}
+
+.guideWSidebar a{
+    font-size: 1.6rem;
+}
+
+.guideWSidebar li{
+    font-size: 1.3rem;
+}
+
+.guideWSidebar button {
+    border: none;
+    border-radius: 0.5rem;
+    background-color: var(--secondary);
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    color: var(--white);
+    transition: 0.2s;
+}
+
+.guideWSidebar button:hover {
+    border: none;
+    border-radius: 0.5rem;
+    background-color: var(--darkgray);
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    color: var(--primary);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.sectionCSS {
+    display: flex;
+    flex-direction: column;
+    justify-content: baseline;
+    align-items: baseline;
+    border: 2px solid var(--primary);
+    border-radius: 1rem;
+}
+
+.sectionCSS div {
+    margin: .5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sectionCSS button {
+    border: none;
+    border-radius: 0.5rem;
+    background-color: var(--secondary);
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    color: var(--white);
+    transition: 0.2s;
+}
+
+.addNewSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.addNewSection  div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.addNewSection div * {
+    margin-bottom: 0.5rem;
+}
+
+.addNewSection img {
+    width: 10rem;
+    display: block;
+}
+

@@ -22,7 +22,7 @@
                     <% } else { %>
                         <a href="/login">Log In</a>
                     <% } %>
-                
+                    
                     <h3>Sections</h3>
                     <% for (let i = 0; i < guide.sections.length; i++) { %>
                         <a href="#section-<%= i %>"><%= guide.sections[i].header %></a>
@@ -52,6 +52,20 @@
             </div>
         </div>
     </div>
+    <script>
+        // Check if the URL contains the alert query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+      
+        if (urlParams.has('alert')) {
+          const alertType = urlParams.get('alert');
+      
+          if (alertType === 'sessionExpired') {
+            alert('Your session has expired. Please log in again.');
+          } else if (alertType === 'invalidToken') {
+            alert('Invalid session. Please log in again.');
+          }
+        }
+      </script>
 
 </body>
 </html>

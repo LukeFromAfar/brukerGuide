@@ -13,16 +13,19 @@ function verifyToken(req, res, next) {
             res.locals.user = verifiedUser;
         } catch (error) {
             if (error.name === 'TokenExpiredError') {
-                return res.status(401).render('404', { message: 'Your session has expired. Please log in again.' });
+                // Redirect to the guide page with an alert if the token has expired
+                return res.redirect(`/guide/${req.params.id}?alert=sessionExpired`);
             } else {
-                return res.status(401).render('404', { message: 'Invalid token. Please try again.' });
+                // Redirect to the guide page if the token is invalid
+                return res.redirect(`/guide/${req.params.id}?alert=invalidToken`);
             }
         }
     } else {
-        // If no token, set user to null but allow the request to proceed
+        // If no token, set user to null and allow the request to proceed
         req.user = null;
         res.locals.user = null;
     }
     next(); // Continue to the next middleware or route handler
 }
+
 module.exports = verifyToken;

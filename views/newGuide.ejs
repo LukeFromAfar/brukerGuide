@@ -12,15 +12,16 @@
     <div class="main-content editing">
         <h1>New Guide</h1>
         <form action="/newGuide" method="post" id="formContainer" enctype="multipart/form-data">
-            <div class="section">
+            <div class="section sectionCSS">
                 <div>
                     <label for="title">Title</label>
                     <input type="text" name="title" id="title" required>
+                     <div>
+                        <label for="tag">Tag</label>
+                        <input type="text" name="tag" id="tag" required>
+                    </div>
                 </div>
-                <div>
-                    <label for="tag">Tag</label>
-                    <input type="text" name="tag" id="tag" required>
-                </div>
+               
                 <div id="addNewSection">
                     <div name="section">
                         <h2>Section 1</h2>

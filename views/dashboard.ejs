@@ -10,8 +10,7 @@
 <body>
     <%- include("partials/navbar") %>
     <div class="main-content">
-        <div class="guidePage">
-            <div class="guideContent">
+            <div class="guideWSidebar">
                 <h1>Dashboard</h1>
                 <a href="/newGuide">Create new guide</a>
                 <h2>Your Guides</h2>
@@ -28,7 +27,6 @@
                     <% } %>
                 </ul>
             </div>
-        </div>
     </div>
     <script>
         function deleteGuide(guideId) {

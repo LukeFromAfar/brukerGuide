@@ -21,7 +21,7 @@
                     <label for="tag">Tag</label>
                     <input type="text" name="tag" id="tag" value="<%= guide.tag %>" required>
                 </div>
-                <div id="addNewSection">
+                <div id="addNewSection" class="addNewSection">
                     <% guide.sections.forEach((section, index) => { %>
                         <div>
                           <label for="header">Header</label>
@@ -43,7 +43,7 @@
             </div>
             <button type="submit">Update Guide</button>
         </form>
-        <button onclick="newSection()">Add new section</button>
+        <button onclick="newSection()" class="newSectionButton">Add new section</button>
     </div>
 
     <script>

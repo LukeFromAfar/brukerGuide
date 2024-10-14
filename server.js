@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require('cookie-parser');
 const fs = require('fs').promises;
 
+
 const verifyToken = require("./functions/verifyToken.js")
 
 app.use(cookieParser());
@@ -43,7 +44,6 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 
 function checkIfAuthenticated(req, res, next) {
@@ -147,8 +147,16 @@ app.post("/signup", async (req, res) => {
   console.log("signer opp her", req.body);
   const { uname, psw, psw2 } = req.body;
 
+  // Check if passwords match
   if (psw === psw2) {
     try {
+      // Check if the user already exists
+      const existingUser = await User.findOne({ email: uname });
+      if (existingUser) {
+        return res.status(400).send("User already exists with this email."); // Inform the user that the email is taken
+      }
+
+      // Hash the password
       const hash = await bcrypt.hash(psw, saltRounds);
       const newUser = new User({ email: uname, password: hash });
       const result = await newUser.save();
@@ -158,7 +166,7 @@ app.post("/signup", async (req, res) => {
 
       // Send the token as a cookie
       res.cookie('token', token, { httpOnly: true, maxAge: 3600000 }); // 1 hour expiration
-      
+
       return res.status(200).redirect("/dashboard"); // Redirect to dashboard after signup
     } catch (error) {
       console.error("Error saving user:", error);
@@ -263,6 +271,11 @@ app.post('/guide/:id/edit', upload.any(), async (req, res) => {
   const guideId = req.params.id;
   const { title, tag, header, description, existingImage } = req.body;
   const uploadedFiles = req.files || [];
+
+  if (!req.user) {
+    // Redirect to the guide if the user is not authenticated
+    return res.redirect(`/guide/${req.params.id}?alert=sessionExpired`);
+  }
 
   try {
     const guide = await Guides.findById(guideId);
