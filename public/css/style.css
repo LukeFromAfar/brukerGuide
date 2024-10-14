@@ -115,6 +115,17 @@ h1 {
     flex-direction: column;
 }
 
+.guideWSidebar {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    
+}
+
+.guideImage {
+    max-width: 40rem;
+}
+
 .main-title {
     display: flex;
     flex-direction: column;
@@ -129,7 +140,7 @@ h1 {
 .main-title input {
     display: inline-block;
     padding: 0.5rem;
-    width: 50%;
+    width: 50%; 
 }
 
 #guideContainer {
@@ -167,7 +178,24 @@ h1 {
     display: flex;
     flex-direction: column;
     font-family: var(--WorkSans);
+    align-items: center; 
+    transition: 0.2s;
+}
+
+.sidebar:hover {
+    transition: 0.2s;
+    filter: drop-shadow(5px 0px 50px var(--darkgray));
+}
+
+/* .sidebar:hover ~ .guidePage {
     
+} */
+
+.sidebarLinks {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    margin-right: 140px;
 }
 
 .guideContent {

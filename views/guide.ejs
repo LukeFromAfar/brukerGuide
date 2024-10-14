@@ -11,23 +11,25 @@
     <div class="main-content">
         <div class="guidePage">
             <div class="sidebar">
-                <a href="/">Home</a>
-                <% if (user) { %>
-                    <% if (user.id == guide.userId.id) { %>
-                        <a href="/guide/<%= guide._id %>/edit">Edit Guide</a>
+                <div class="sidebarLinks">
+                    <a href="/">Home</a>
+                    <% if (user) { %>
+                        <% if (user.id == guide.userId.id) { %>
+                            <a href="/guide/<%= guide._id %>/edit">Edit Guide</a>
+                        <% } %>
+                        <a href="/logout">Log Out</a>
+                        <a href="/dashboard">Dashboard</a>
+                    <% } else { %>
+                        <a href="/login">Log In</a>
                     <% } %>
-                    <a href="/logout">Log Out</a>
-                    <a href="/dashboard">Dashboard</a>
-                <% } else { %>
-                    <a href="/login">Log In</a>
-                <% } %>
-            
-                <h3>Sections</h3>
-                <% for (let i = 0; i < guide.sections.length; i++) { %>
-                    <a href="#section-<%= i %>"><%= guide.sections[i].header %></a>
-                <% } %>
+                
+                    <h3>Sections</h3>
+                    <% for (let i = 0; i < guide.sections.length; i++) { %>
+                        <a href="#section-<%= i %>"><%= guide.sections[i].header %></a>
+                    <% } %>
+                </div>
             </div>
-            <div class="guideContent">
+            <div class="guideContent guideWSidebar">
                 <h1><%= guide.title %></h1> <!-- Display the guide title -->
                 <p><strong>Tag:</strong> <%= guide.tag %></p> <!-- Display the guide tag -->
                 
@@ -37,7 +39,7 @@
                         <h2><%= guide.sections[i].header %></h2> <!-- Section header -->
                         <p><%= guide.sections[i].description %></p> <!-- Section description -->
                         <% if (guide.sections[i].image) { %>
-                            <img src="/uploads/<%= guide.sections[i].image %>" alt="<%= guide.sections[i].header %> image"> <!-- Section image -->
+                            <img src="/uploads/<%= guide.sections[i].image %>" class="guideImage" alt="<%= guide.sections[i].header %> image"> <!-- Section image -->
                         <% } %>
                     </div>
                 <% } %>
