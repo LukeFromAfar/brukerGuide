@@ -9,40 +9,42 @@
 </head>
 <body>
     <%- include ("partials/navbar") %>
-    <div class="main-content editing">
-        <h1>New Guide</h1>
-        <form action="/newGuide" method="post" id="formContainer" enctype="multipart/form-data">
-            <div class="section sectionCSS">
-                <div>
-                    <label for="title">Title</label>
-                    <input type="text" name="title" id="title" required>
-                     <div>
-                        <label for="tag">Tag</label>
-                        <input type="text" name="tag" id="tag" required>
-                    </div>
-                </div>
-               
-                <div id="addNewSection">
-                    <div name="section">
-                        <h2>Section 1</h2>
-                        <div>
-                            <label for="header">Header</label>
-                            <input type="text" name="header[0]" id="header-0" >
-                        </div>
-                        <div>
-                            <label for="description">Description</label>
-                            <input type="text" name="description[0]" id="description-0" >
-                        </div>
-                        <div>
-                            <label for="image">Image</label>
-                            <input type="file" name="image[0]" id="image-0" accept="image/png, image/jpeg, image/jpg">
+    <div class="main-content">
+        <div class="editing">
+            <h1>New Guide</h1>
+            <form action="/newGuide" method="post" id="formContainer" enctype="multipart/form-data">
+                <div class="section sectionCSS">
+                    <div>
+                        <label for="title">Title</label>
+                        <input type="text" name="title" id="title" required>
+                         <div>
+                            <label for="tag">Tag</label>
+                            <input type="text" name="tag" id="tag" required>
                         </div>
                     </div>
+                   
+                    <div id="addNewSection">
+                        <div name="section">
+                            <h2>Section 1</h2>
+                            <div>
+                                <label for="header">Header</label>
+                                <input type="text" name="header[0]" id="header-0" >
+                            </div>
+                            <div>
+                                <label for="description">Description</label>
+                                <input type="text" name="description[0]" id="description-0" >
+                            </div>
+                            <div>
+                                <label for="image">Image</label>
+                                <input type="file" name="image[0]" id="image-0" accept="image/png, image/jpeg, image/jpg">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <button>Send in</button>
-        </form>
-        <button onclick="newSection()">Create new section</button>
+                <button>Send in</button>
+            </form>
+            <button onclick="newSection()">Create new section</button>
+        </div>
     </div>
 
     <script>
