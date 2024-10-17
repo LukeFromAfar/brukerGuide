@@ -29,7 +29,7 @@
                               <input type="text" name="header[]" value="<%= section.header %>" />
                               
                               <label for="description">Description</label>
-                              <input type="text" name="description[]" value="<%= section.description %>" />
+                              <input type="text" name="description[]" value="<%= section.description %>" class="descriptionArea"/>
                               
                               <label for="image">Image</label>
                               <input type="file" name="image[<%= index %>]" />
@@ -80,7 +80,7 @@
                     </div>
                     <div>
                         <label for="description-${sectionIndex - 1}">Description</label>
-                        <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}">
+                        <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}" class="descriptionArea">
                     </div>
                     <div>
                         <label for="image-${sectionIndex - 1}">Image</label>

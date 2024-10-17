@@ -333,6 +333,12 @@ input[type=submit] {
 
 .guideWSidebar p {
     font-size: 1.5rem;
+    width: 60%;
+}
+
+.guideWSidebar ul{
+    width: 60%;
+    list-style: none;
 }
 
 .guideWSidebar li{
@@ -367,6 +373,14 @@ input[type=submit] {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.sectionGuide p, .sectionGuide h2 {
+    width: 20%;
+}
+
+.descriptionArea {
+    width: 100%;
 }
 
 .sectionCSS {
