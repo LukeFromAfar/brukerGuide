@@ -200,33 +200,36 @@ h1 {
 .sidebarLinks {
     display: flex;
     flex-direction: column;
-    align-items: center;
     position: fixed;
     left: 10%;
     transform: translate(-50%, 0);
     margin-top: 4rem;
-    overflow-y: auto;
-    overflow-x:hidden;
+    overflow-x: hidden;
     height: 90%;
+    width: 15%;
+    word-wrap: break-word;
+    text-align: start;
 }
 
 .guideContent {
     grid-area: guideContent;
-    display: flex;
+    /* display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: center; */
 }
 
 .sidebarLinks h3, .sidebarLinks a {
     display: inline-block;
-    font-size: 40px;
+    font-size: 24px;
     margin: 0px;
     text-decoration: none;
     color: var(--white);
     margin-bottom: 0.7rem;
     padding: 0.5rem;
     transition: 0.2s;
+    text-align: start;
+    
 }
 
 .sidebarLinks a:hover {
@@ -301,11 +304,14 @@ input[type=submit] {
 
 .guideWSidebar {
     display: flex;
+    text-align: center;
     align-items: center;
-    justify-content: center;
+    /* justify-content: center; */
     flex-direction: column;
     width: 100%;
-    padding-top: 100px;;
+    padding-top: 100px;
+    grid-area: guideContent;
+    overflow-wrap: break-word;
 }
 
 .guideWSidebar a {
@@ -317,10 +323,16 @@ input[type=submit] {
 .guideWSidebar h2 {
     color: var(--white);
     font-size: 3rem;
+    width: 50%;
 }
 
 .guideWSidebar h1{
     font-size: 5rem;
+    width: 60%;
+}
+
+.guideWSidebar p {
+    font-size: 1.5rem;
 }
 
 .guideWSidebar li{
@@ -349,6 +361,12 @@ input[type=submit] {
     color: var(--primary);
     cursor: pointer;
     transition: 0.2s;
+}
+
+.sectionGuide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .sectionCSS {
@@ -399,7 +417,6 @@ input[type=submit] {
     width: 10rem;
     display: block;
 }
-
 
 
 @media screen and (max-width: 480px) {

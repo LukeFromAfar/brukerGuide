@@ -35,7 +35,7 @@
                 
                 <!-- Loop through the sections to display headers, descriptions, and images -->
                 <% for (let i = 0; i < guide.sections.length; i++) { %>
-                    <div class="section" id="section-<%= i %>"> <!-- Add an ID for scrolling -->
+                    <div class="section sectionGuide" id="section-<%= i %>"> <!-- Add an ID for scrolling -->
                         <h2><%= guide.sections[i].header %></h2> <!-- Section header -->
                         <p><%= guide.sections[i].description %></p> <!-- Section description -->
                         <% if (guide.sections[i].image) { %>
