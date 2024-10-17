@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
     <link rel="stylesheet" href="/css/style.css">
-    <title>Guide</title>
+    <title>New Guide</title>
 </head>
 <body>
     <%- include ("partials/navbar") %>
@@ -17,7 +17,7 @@
                     <div>
                         <label for="title">Title</label>
                         <input type="text" name="title" id="title" required>
-                         <div>
+                        <div>
                             <label for="tag">Tag</label>
                             <input type="text" name="tag" id="tag" required>
                         </div>
@@ -28,11 +28,11 @@
                             <h2>Section 1</h2>
                             <div>
                                 <label for="header">Header</label>
-                                <input type="text" name="header[0]" id="header-0" >
+                                <input type="text" name="header[0]" id="header-0" required>
                             </div>
                             <div>
                                 <label for="description">Description</label>
-                                <input type="text" name="description[0]" id="description-0" class="descriptionArea">
+                                <textarea name="description[0]" id="description-0" class="descriptionArea"></textarea>
                             </div>
                             <div>
                                 <label for="image">Image</label>
@@ -41,9 +41,9 @@
                         </div>
                     </div>
                 </div>
-                <button>Send in</button>
+                <button type="submit">Create Guide</button>
             </form>
-            <button onclick="newSection()">Create new section</button>
+            <button onclick="newSection()">Add new section</button>
         </div>
     </div>
 
@@ -62,8 +62,8 @@
         });
 
         function newSection() {
-            // Collect current input values (only text fields, not file inputs)
-            const inputs = document.querySelectorAll('input[type="text"]');
+            // Collect current input values (text fields and textareas, not file inputs)
+            const inputs = document.querySelectorAll('input[type="text"], textarea');
             let values = {};
             inputs.forEach(input => {
                 values[input.id] = input.value; // Save current values by input ID
@@ -74,24 +74,27 @@
             // Increment the section index
             sectionIndex++;
 
-            // Append a new section with indexed inputs
-            addNewSection.innerHTML += `
-                <div name="section">
-                    <h2>Section ${sectionIndex}</h2>
-                    <div>
-                        <label for="header">Header</label>
-                        <input type="text" name="header[${sectionIndex - 1}]" id="header-${sectionIndex - 1}" required>
-                    </div>
-                    <div>
-                        <label for="description">Description</label>
-                        <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}" class="descriptionArea">
-                    </div>
-                    <div>
-                        <label for="image-${sectionIndex - 1}">Image</label>
-                        <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
-                    </div>
+            // Create a new section element
+            const newSectionDiv = document.createElement('div');
+            newSectionDiv.setAttribute('name', 'section');
+            newSectionDiv.innerHTML = `
+                <h2>Section ${sectionIndex}</h2>
+                <div>
+                    <label for="header-${sectionIndex - 1}">Header</label>
+                    <input type="text" name="header[${sectionIndex - 1}]" id="header-${sectionIndex - 1}" required>
+                </div>
+                <div>
+                    <label for="description-${sectionIndex - 1}">Description</label>
+                    <textarea name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}" class="descriptionArea"></textarea>
+                </div>
+                <div>
+                    <label for="image-${sectionIndex - 1}">Image</label>
+                    <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
                 </div>
             `;
+
+            // Append the new section
+            addNewSection.appendChild(newSectionDiv);
 
             // Restore the values in existing fields (non-file fields)
             inputs.forEach(input => {

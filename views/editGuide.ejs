@@ -9,7 +9,7 @@
 </head>
 <body>
     <%- include("partials/navbar") %>
-    <div class="main-content ">
+    <div class="main-content">
         <div class="editing">
             <h1>Edit Guide</h1>
             <form action="/guide/<%= guide._id %>/edit" method="POST" id="formContainer" enctype="multipart/form-data">
@@ -24,85 +24,51 @@
                     </div>
                     <div id="addNewSection" class="addNewSection">
                         <% guide.sections.forEach((section, index) => { %>
-                            <div>
-                              <label for="header">Header</label>
-                              <input type="text" name="header[]" value="<%= section.header %>" />
-                              
-                              <label for="description">Description</label>
-                              <input type="text" name="description[]" value="<%= section.description %>" class="descriptionArea"/>
-                              
-                              <label for="image">Image</label>
-                              <input type="file" name="image[<%= index %>]" />
-                              
-                              <% if (section.image) { %>
-                                <img src="/uploads/<%= section.image %>" alt="Section Image" />
-                                <input type="hidden" name="existingImage[]" value="<%= section.image %>" />
-                              <% } %>
+                            <div class="section">
+                                <label for="header-<%= index %>">Header</label>
+                                <input type="text" name="header[]" id="header-<%= index %>" value="<%= section.header %>" required>
+                                
+                                <label for="description-<%= index %>">Description</label>
+                                <textarea name="description[]" id="description-<%= index %>" class="descriptionArea"><%= section.description %></textarea>
+                                
+                                <label for="image-<%= index %>">Image</label>
+                                <input type="file" name="image[<%= index %>]" id="image-<%= index %>">
+                                
+                                <% if (section.image) { %>
+                                    <img src="/uploads/<%= section.image %>" alt="Section Image" width="100">
+                                    <input type="hidden" name="existingImage[]" value="<%= section.image %>">
+                                <% } %>
                             </div>
-                          <% }) %>
+                        <% }) %>
                     </div>
                 </div>
+                <button type="button" onclick="addSection()" class="newSectionButton">Add new section</button>
                 <button type="submit">Update Guide</button>
             </form>
-            <button onclick="newSection()" class="newSectionButton">Add new section</button>
         </div>
     </div>
 
     <script>
         let sectionIndex = <%= guide.sections.length %>;
-        let filesData = {};
 
-        // Save selected files when a file is chosen
-        document.addEventListener('change', (event) => {
-            if (event.target.type === 'file') {
-                const index = event.target.id.split('-')[1];
-                filesData[`image-${index}`] = event.target.files[0];
-            }
-        });
-
-        function newSection() {
-            const inputs = document.querySelectorAll('input[type="text"]');
-            let values = {};
-            inputs.forEach(input => {
-                values[input.id] = input.value;
-            });
-
+        function addSection() {
             let addNewSection = document.getElementById("addNewSection");
 
-            sectionIndex++;
-
-            addNewSection.innerHTML += `
-                <div name="section">
-                    <h2>Section ${sectionIndex}</h2>
-                    <div>
-                        <label for="header-${sectionIndex - 1}">Header</label>
-                        <input type="text" name="header[${sectionIndex - 1}]" id="header-${sectionIndex - 1}" required>
-                    </div>
-                    <div>
-                        <label for="description-${sectionIndex - 1}">Description</label>
-                        <input type="text" name="description[${sectionIndex - 1}]" id="description-${sectionIndex - 1}" class="descriptionArea">
-                    </div>
-                    <div>
-                        <label for="image-${sectionIndex - 1}">Image</label>
-                        <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
-                    </div>
-                </div>
+            const newSectionDiv = document.createElement('div');
+            newSectionDiv.className = 'section';
+            newSectionDiv.innerHTML = `
+                <label for="header-${sectionIndex}">Header</label>
+                <input type="text" name="header[]" id="header-${sectionIndex}" required>
+                
+                <label for="description-${sectionIndex}">Description</label>
+                <textarea name="description[]" id="description-${sectionIndex}" class="descriptionArea"></textarea>
+                
+                <label for="image-${sectionIndex}">Image</label>
+                <input type="file" name="image[${sectionIndex}]" id="image-${sectionIndex}">
             `;
 
-            inputs.forEach(input => {
-                if (values[input.id]) {
-                    document.getElementById(input.id).value = values[input.id];
-                }
-            });
-
-            for (const key in filesData) {
-                const inputElement = document.getElementById(key);
-                if (inputElement && filesData[key]) {
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(filesData[key]);
-                    inputElement.files = dataTransfer.files;
-                }
-            }
+            addNewSection.appendChild(newSectionDiv);
+            sectionIndex++;
         }
     </script>
 </body>

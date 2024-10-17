@@ -294,6 +294,14 @@ input[type=submit] {
     border-radius: 0.2rem;
 }
 
+#formContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
 .editing {
     align-items: center;
     padding-top: 4rem;
@@ -369,18 +377,27 @@ input[type=submit] {
     transition: 0.2s;
 }
 
+.section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .sectionGuide {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
 }
 
 .sectionGuide p, .sectionGuide h2 {
-    width: 20%;
+    width: 60%;
 }
 
 .descriptionArea {
-    width: 100%;
+    min-height: 5rem;
+    min-width: 18rem;
 }
 
 .sectionCSS {
