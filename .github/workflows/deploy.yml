@@ -29,7 +29,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./
-        run: npm i
+        run: cd /var/www/userGuide && npm i
       
       - name: Reload with PM2
         run: |
