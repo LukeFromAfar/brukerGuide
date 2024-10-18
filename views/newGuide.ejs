@@ -6,6 +6,54 @@
     <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
     <link rel="stylesheet" href="/css/style.css">
     <title>New Guide</title>
+    <style>
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 480px;
+            font-family: sans-serif;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        .drop-zone--over {
+            border-style: solid;
+        }
+
+        .drop-zone__prompt {
+            color: #0f3c4b;
+            font-size: 20px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .drop-zone__input {
+            display: none;
+        }
+
+        .drop-zone__thumb {
+            width: 100%;
+            height: 150px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #cccccc;
+            background-size: cover;
+            position: relative;
+        }
+
+        .drop-zone__thumb::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 5px 0;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.75);
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <%- include ("partials/navbar") %>
@@ -24,7 +72,7 @@
                     </div>
                    
                     <div id="addNewSection">
-                        <div name="section">
+                        <div name="section" id="section-0">
                             <h2>Section 1</h2>
                             <div>
                                 <label for="header">Header</label>
@@ -36,14 +84,18 @@
                             </div>
                             <div>
                                 <label for="image">Image</label>
-                                <input type="file" name="image[0]" id="image-0" accept="image/png, image/jpeg, image/jpg">
+                                <div class="drop-zone">
+                                    <span class="drop-zone__prompt">Drop file here or click to upload</span>
+                                    <input type="file" name="image[0]" id="image-0" class="drop-zone__input" accept="image/png, image/jpeg, image/jpg">
+                                </div>
                             </div>
+                            <button type="button" onclick="deleteSection(0)" class="deleteSectionButton">Delete Section</button>
                         </div>
                     </div>
                 </div>
+                <button type="button" onclick="newSection()">Add new section</button>
                 <button type="submit">Create Guide</button>
             </form>
-            <button onclick="newSection()">Add new section</button>
         </div>
     </div>
 
@@ -77,6 +129,7 @@
             // Create a new section element
             const newSectionDiv = document.createElement('div');
             newSectionDiv.setAttribute('name', 'section');
+            newSectionDiv.id = `section-${sectionIndex - 1}`;
             newSectionDiv.innerHTML = `
                 <h2>Section ${sectionIndex}</h2>
                 <div>
@@ -89,8 +142,12 @@
                 </div>
                 <div>
                     <label for="image-${sectionIndex - 1}">Image</label>
-                    <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" accept="image/png, image/jpeg, image/jpg">
+                    <div class="drop-zone">
+                        <span class="drop-zone__prompt">Drop file here or click to upload</span>
+                        <input type="file" name="image[${sectionIndex - 1}]" id="image-${sectionIndex - 1}" class="drop-zone__input" accept="image/png, image/jpeg, image/jpg">
+                    </div>
                 </div>
+                <button type="button" onclick="deleteSection(${sectionIndex - 1})" class="deleteSectionButton">Delete Section</button>
             `;
 
             // Append the new section
@@ -111,6 +168,91 @@
                     dataTransfer.items.add(filesData[key]); // Re-add the selected file
                     inputElement.files = dataTransfer.files; // Assign the file back to the input
                 }
+            }
+
+            // Initialize drag and drop for the new section
+            document.querySelectorAll(".drop-zone__input").forEach(inputElement => {
+                const dropZoneElement = inputElement.closest(".drop-zone");
+                initializeDropZone(dropZoneElement);
+            });
+        }
+
+        function deleteSection(index) {
+            const sectionToDelete = document.getElementById(`section-${index}`);
+            if (sectionToDelete) {
+                sectionToDelete.remove();
+            }
+        }
+
+        // Drag and drop functionality
+        document.querySelectorAll(".drop-zone__input").forEach(inputElement => {
+            const dropZoneElement = inputElement.closest(".drop-zone");
+            initializeDropZone(dropZoneElement);
+        });
+
+        function initializeDropZone(dropZoneElement) {
+            let inputElement = dropZoneElement.querySelector(".drop-zone__input");
+
+            dropZoneElement.addEventListener("click", e => {
+                inputElement.click();
+            });
+
+            inputElement.addEventListener("change", e => {
+                if (inputElement.files.length) {
+                    updateThumbnail(dropZoneElement, inputElement.files[0]);
+                }
+            });
+
+            dropZoneElement.addEventListener("dragover", e => {
+                e.preventDefault();
+                dropZoneElement.classList.add("drop-zone--over");
+            });
+
+            ["dragleave", "dragend"].forEach(type => {
+                dropZoneElement.addEventListener(type, e => {
+                    dropZoneElement.classList.remove("drop-zone--over");
+                });
+            });
+
+            dropZoneElement.addEventListener("drop", e => {
+                e.preventDefault();
+
+                if (e.dataTransfer.files.length) {
+                    inputElement.files = e.dataTransfer.files;
+                    updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
+                }
+
+                dropZoneElement.classList.remove("drop-zone--over");
+            });
+        }
+
+        function updateThumbnail(dropZoneElement, file) {
+            let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
+
+            // First time - remove the prompt
+            if (dropZoneElement.querySelector(".drop-zone__prompt")) {
+                dropZoneElement.querySelector(".drop-zone__prompt").remove();
+            }
+
+            // First time - there is no thumbnail element, so lets create it
+            if (!thumbnailElement) {
+                thumbnailElement = document.createElement("div");
+                thumbnailElement.classList.add("drop-zone__thumb");
+                dropZoneElement.appendChild(thumbnailElement);
+            }
+
+            thumbnailElement.dataset.label = file.name;
+
+            // Show thumbnail for image files
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    thumbnailElement.style.backgroundImage = `url('${reader.result}')`;
+                };
+            } else {
+                thumbnailElement.style.backgroundImage = null;
             }
         }
     </script>

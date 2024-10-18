@@ -212,32 +212,42 @@ app.get("/dashboard", verifyToken, async (req, res) => {
 
 app.get("/newGuide", (req, res) => {
   res.render("newGuide");
+  
 });
 
 app.post("/newGuide", verifyToken, upload.any(), async (req, res) => {
-  const userId = req.user.id; // Get the user ID from the request object
+  if (!req.user) {
+    return res.redirect(`/?alert=sessionExpired`);
+  }
+  const userId = req.user.id;
   console.log(req.body, "BODY");
   console.log(req.files, "FILES");
 
   // Process each section data
-  const sections = req.body.header.map((header, index) => ({
-    header,
-    description: req.body.description ? req.body.description[index] : null,
-    image: req.files.find((file) => file.fieldname === `image[${index}]`)
-      ? req.files.find((file) => file.fieldname === `image[${index}]`).filename
-      : null,
-  }));
+  const sections = [];
+  for (let i = 0; i < req.body.header.length; i++) {
+    // Check if the section exists (wasn't deleted)
+    if (req.body.header[i]) {
+      sections.push({
+        header: req.body.header[i],
+        description: req.body.description ? req.body.description[i] : null,
+        image: req.files.find((file) => file.fieldname === `image[${i}]`)
+          ? req.files.find((file) => file.fieldname === `image[${i}]`).filename
+          : null,
+      });
+    }
+  }
 
   const newGuide = new Guides({
     title: req.body.title,
     tag: req.body.tag,
     sections,
-    userId: userId,  // Save the user's ID from req.user
+    userId: userId,
   });
 
   try {
     const result = await newGuide.save();
-    res.redirect("/dashboard"); // Redirect to dashboard after creating a guide
+    res.redirect("/dashboard");
   } catch (error) {
     console.error("Error saving guide:", error);
     res.status(500).send("Internal server error");
@@ -245,6 +255,9 @@ app.post("/newGuide", verifyToken, upload.any(), async (req, res) => {
 });
 
 app.get('/guide/:id/edit', verifyToken, async (req, res) => {
+  if (!req.user) {
+    return res.redirect(`/guide/${req.params.id}?alert=sessionExpired`);
+  }
   const guideId = req.params.id;
   const userId = req.user.id; // Get the logged-in user's ID from JWT
 
@@ -273,7 +286,6 @@ app.post('/guide/:id/edit', upload.any(), async (req, res) => {
   const uploadedFiles = req.files || [];
 
   if (!req.user) {
-    // Redirect to the guide if the user is not authenticated
     return res.redirect(`/guide/${req.params.id}?alert=sessionExpired`);
   }
 
@@ -317,7 +329,7 @@ app.post('/guide/:id/edit', upload.any(), async (req, res) => {
     for (const img of imagesToDelete) {
       const imgPath = path.join(__dirname, 'uploads', img);
       try {
-        await fs.unlink(imgPath); // Remove the old file from /uploads
+        await fs.unlink(imgPath);
         console.log(`Deleted unused image: ${img}`);
       } catch (err) {
         console.error(`Failed to delete image ${img}:`, err);

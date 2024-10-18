@@ -6,6 +6,54 @@
     <link rel="shortcut icon" href="/informationFavicon.png" type="image/x-icon">
     <link rel="stylesheet" href="/css/style.css">
     <title>Edit <%= guide.title %></title>
+    <style>
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 480px;
+            font-family: sans-serif;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        .drop-zone--over {
+            border-style: solid;
+        }
+
+        .drop-zone__prompt {
+            color: #0f3c4b;
+            font-size: 20px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .drop-zone__input {
+            display: none;
+        }
+
+        .drop-zone__thumb {
+            width: 100%;
+            height: 150px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #cccccc;
+            background-size: cover;
+            position: relative;
+        }
+
+        .drop-zone__thumb::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 5px 0;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.75);
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <%- include("partials/navbar") %>
@@ -24,7 +72,7 @@
                     </div>
                     <div id="addNewSection" class="addNewSection">
                         <% guide.sections.forEach((section, index) => { %>
-                            <div class="section">
+                            <div class="section" id="section-<%= index %>">
                                 <label for="header-<%= index %>">Header</label>
                                 <input type="text" name="header[]" id="header-<%= index %>" value="<%= section.header %>" required>
                                 
@@ -32,12 +80,17 @@
                                 <textarea name="description[]" id="description-<%= index %>" class="descriptionArea"><%= section.description %></textarea>
                                 
                                 <label for="image-<%= index %>">Image</label>
-                                <input type="file" name="image[<%= index %>]" id="image-<%= index %>">
+                                <div class="drop-zone">
+                                    <% if (section.image) { %>
+                                        <div class="drop-zone__thumb" data-label="<%= section.image %>" style="background-image: url('/uploads/<%= section.image %>')"></div>
+                                        <input type="hidden" name="existingImage[]" value="<%= section.image %>">
+                                    <% } else { %>
+                                        <span class="drop-zone__prompt">Drop file here or click to upload</span>
+                                    <% } %>
+                                    <input type="file" name="image[<%= index %>]" id="image-<%= index %>" class="drop-zone__input">
+                                </div>
                                 
-                                <% if (section.image) { %>
-                                    <img src="/uploads/<%= section.image %>" alt="Section Image" width="100">
-                                    <input type="hidden" name="existingImage[]" value="<%= section.image %>">
-                                <% } %>
+                                <button type="button" onclick="deleteSection(<%= index %>)" class="deleteSectionButton">Delete Section</button>
                             </div>
                         <% }) %>
                     </div>
@@ -56,6 +109,7 @@
 
             const newSectionDiv = document.createElement('div');
             newSectionDiv.className = 'section';
+            newSectionDiv.id = `section-${sectionIndex}`;
             newSectionDiv.innerHTML = `
                 <label for="header-${sectionIndex}">Header</label>
                 <input type="text" name="header[]" id="header-${sectionIndex}" required>
@@ -64,12 +118,99 @@
                 <textarea name="description[]" id="description-${sectionIndex}" class="descriptionArea"></textarea>
                 
                 <label for="image-${sectionIndex}">Image</label>
-                <input type="file" name="image[${sectionIndex}]" id="image-${sectionIndex}">
+                <div class="drop-zone">
+                    <span class="drop-zone__prompt">Drop file here or click to upload</span>
+                    <input type="file" name="image[${sectionIndex}]" id="image-${sectionIndex}" class="drop-zone__input">
+                </div>
+                
+                <button type="button" onclick="deleteSection(${sectionIndex})" class="deleteSectionButton">Delete Section</button>
             `;
 
             addNewSection.appendChild(newSectionDiv);
+            initializeDropZone(newSectionDiv.querySelector('.drop-zone'));
             sectionIndex++;
         }
+
+        function deleteSection(index) {
+            const sectionToDelete = document.getElementById(`section-${index}`);
+            if (sectionToDelete) {
+                sectionToDelete.remove();
+            }
+        }
+
+        // Drag and drop functionality
+        document.querySelectorAll(".drop-zone__input").forEach(inputElement => {
+            const dropZoneElement = inputElement.closest(".drop-zone");
+            initializeDropZone(dropZoneElement);
+        });
+
+        function initializeDropZone(dropZoneElement) {
+            let inputElement = dropZoneElement.querySelector(".drop-zone__input");
+
+            dropZoneElement.addEventListener("click", e => {
+                inputElement.click();
+            });
+
+            inputElement.addEventListener("change", e => {
+                if (inputElement.files.length) {
+                    updateThumbnail(dropZoneElement, inputElement.files[0]);
+                }
+            });
+
+            dropZoneElement.addEventListener("dragover", e => {
+                e.preventDefault();
+                dropZoneElement.classList.add("drop-zone--over");
+            });
+
+            ["dragleave", "dragend"].forEach(type => {
+                dropZoneElement.addEventListener(type, e => {
+                    dropZoneElement.classList.remove("drop-zone--over");
+                });
+            });
+
+            dropZoneElement.addEventListener("drop", e => {
+                e.preventDefault();
+
+                if (e.dataTransfer.files.length) {
+                    inputElement.files = e.dataTransfer.files;
+                    updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
+                }
+
+                dropZoneElement.classList.remove("drop-zone--over");
+            });
+        }
+
+        function updateThumbnail(dropZoneElement, file) {
+            let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
+
+            // First time - remove the prompt
+            if (dropZoneElement.querySelector(".drop-zone__prompt")) {
+                dropZoneElement.querySelector(".drop-zone__prompt").remove();
+            }
+
+            // First time - there is no thumbnail element, so lets create it
+            if (!thumbnailElement) {
+                thumbnailElement = document.createElement("div");
+                thumbnailElement.classList.add("drop-zone__thumb");
+                dropZoneElement.appendChild(thumbnailElement);
+            }
+
+            thumbnailElement.dataset.label = file.name;
+
+            // Show thumbnail for image files
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    thumbnailElement.style.backgroundImage = `url('${reader.result}')`;
+                };
+            } else {
+                thumbnailElement.style.backgroundImage = null;
+            }
+        }
     </script>
+</body>
+</html>
 </body>
 </html>
