@@ -15,8 +15,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      
+      - name: Go to directory
+        run: cd /var/www/userGuide
+
       - name: Pull latest changes
-        run: git pull --no-edit origin main
+        run: cd /var/www/userGuide && git pull --no-edit origin main
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
