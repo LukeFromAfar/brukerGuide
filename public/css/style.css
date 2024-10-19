@@ -264,6 +264,10 @@ h1 {
     margin: 0.5rem;
 }
 
+.centerLogin a {
+    color:  var(--primary);
+}
+
 .submitLogButton {
     font-size: 1.2rem;
     cursor: pointer;
@@ -287,6 +291,11 @@ h1 {
     font-size: 1rem;
 }
 
+.form input {
+    padding: 0.5rem;
+    border-radius: 1rem;
+}
+
 input[type=submit] {
     color: var(--darkergray);
     background-color:var(--primary);
@@ -299,8 +308,21 @@ input[type=submit] {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
+    padding-bottom: 8rem;
 }
+
+#formContainer button {
+    border: none;
+    border-radius: 0.5rem;
+    background-color: var(--secondary);
+    padding: 0.5rem;
+    margin: 0.5em;
+    font-size: 1.2rem;
+    margin-left: 0.5rem;
+    color: var(--white);
+    transition: 0.2s;
+}
+
 
 .editing {
     align-items: center;
@@ -398,21 +420,29 @@ input[type=submit] {
 .descriptionArea {
     min-height: 5rem;
     min-width: 18rem;
+    max-width: 60vw;
 }
 
 .sectionCSS {
     display: flex;
     flex-direction: column;
     justify-content: baseline;
-    align-items: baseline;
+    align-items: center;
     border: 2px solid var(--primary);
     border-radius: 1rem;
+    
 }
 
 .sectionCSS div {
     margin: .5rem;
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+.sectionCSS div input, textarea {
+    padding: 0.5rem;
+    border-radius: 1rem;
 }
 
 .sectionCSS button {
@@ -420,6 +450,7 @@ input[type=submit] {
     border-radius: 0.5rem;
     background-color: var(--secondary);
     padding: 0.5rem;
+    margin: 0px;
     font-size: 1.2rem;
     margin-left: 0.5rem;
     color: var(--white);
@@ -451,7 +482,7 @@ input[type=submit] {
 
 
 .drop-zone {
-    border: 2px dashed #ccc;
+    border: 2px dashed var(--primary);
     border-radius: 20px;
     width: 480px;
     font-family: sans-serif;
@@ -464,7 +495,7 @@ input[type=submit] {
 }
 
 .drop-zone__prompt {
-    color: #0f3c4b;
+    color: var(--secondary);
     font-size: 20px;
     text-align: center;
     padding: 20px;
