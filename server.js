@@ -10,7 +10,11 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs').promises;
 
 
-const verifyToken = require("./functions/verifyToken.js")
+const verifyToken = require("./functions/verifyToken.js");
+const checkIfAuthenticated = require("./functions/checkIfAuthenticated.js");
+
+const User = require("./models/User.js");
+const Guides = require("./models/Guide.js");
 
 app.use(cookieParser());
 
@@ -46,23 +50,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-function checkIfAuthenticated(req, res, next) {
-  const token = req.cookies.token || req.headers['authorization'];
-
-  if (token) {
-      try {
-          jwt.verify(token, process.env.JWT_SECRET_KEY);
-          return res.redirect('/dashboard');  // Redirect to dashboard if token is valid
-      } catch (err) {
-          // Token is invalid, proceed to login
-          return next();
-      }
-  } else {
-      // No token found, proceed to login
-      next();
-  }
-}
-
+app.use(checkIfAuthenticated);
 app.use(verifyToken);
 
 // Protect the newGuide route
@@ -118,27 +106,6 @@ app.post("/login", (req, res) => {
       });
 });
 
-const userSchema = new Schema({
-  email: String,
-  password: String,
-});
-
-const guideSchema = new Schema({
-  title: { type: String, required: true },
-  tag: { type: String, required: true },
-  sections: [
-    {
-      header: { type: String, required: false },
-      description: { type: String, required: false },
-      image: { type: String, required: false },
-    },
-  ],
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // Add this line
-});
-
-const User = mongoose.model("User", userSchema);
-const Guides = mongoose.model("Guides", guideSchema);
-
 app.get('/signup', (req, res) => {
   res.render('signup');
 });
@@ -184,14 +151,17 @@ app.get("/guide", (req, res) => {
 app.get("/guide/:id", async (req, res) => {
   try {
     const guideId = req.params.id;
-    const guide = await Guides.findById(guideId).populate('userId'); // Ensure userId is populated
+    const guide = await Guides.findById(guideId).populate('userId');
 
     if (!guide) {
       return res.status(404).render('404', { message: 'Guide not found.', user: req.user });
     }
 
-    // Render the guide and pass the user info
-    res.render("guide", { guide, user: req.user });
+    // Get the alert message from query parameters
+    const alert = req.query.alert;
+
+    // Render the guide and pass the user info and alert
+    res.render("guide", { guide, user: req.user, alert });
   } catch (error) {
     console.error("Error fetching guide:", error);
     res.status(500).render('404', { message: 'Server error. Please try again later.', user: req.user });
@@ -199,6 +169,9 @@ app.get("/guide/:id", async (req, res) => {
 });
 
 app.get("/dashboard", verifyToken, async (req, res) => {
+  if (!req.user) {
+    return res.redirect(`/?alert=sessionExpired`);
+  }
   try {
       const userId = req.user.id; // Extract user ID from the verified token
       const guides = await Guides.find({ userId }) || []; // Always initialize guides as an empty array
@@ -268,9 +241,8 @@ app.get('/guide/:id/edit', verifyToken, async (req, res) => {
       return res.status(404).send('Guide not found');
     }
 
-    // Check if the logged-in user is the creator of the guide
     if (!guide.userId.equals(userId)) {
-      return res.status(403).send('You do not have permission to edit this guide'); // Forbidden access
+      return res.redirect(`/guide/${guideId}?alert=unauthorized`);
     }
 
     res.render('editGuide', { guide });
